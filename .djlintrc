@@ -1,0 +1,7 @@
+{
+    "profile": "jinja",
+    "indent": 4,
+    "format_css": true,
+    "format_js": true,
+    "blank_line_after_tag": "load,extends,include"
+}

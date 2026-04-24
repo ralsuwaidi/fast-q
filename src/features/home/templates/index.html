@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Modern Stack</title>
+        <link href="/static/output.css" rel="stylesheet">
+        <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+    </head>
+    <body class="bg-slate-50 text-slate-900 p-10 flex flex-col items-center justify-center min-h-screen">
+        <div class="max-w-md w-full bg-white p-8 rounded-2xl shadow-xl border border-slate-100 text-center">
+            <h1 class="text-3xl font-extrabold tracking-tight mb-4 text-blue-600">System Online</h1>
+            <p class="text-slate-500 mb-8">FastAPI + HTMX + Tailwind v4 wired up perfectly.</p>
+            <button hx-post="/ping"
+                    hx-target="#result"
+                    class="px-6 py-3 bg-slate-900 text-white font-medium rounded-xl hover:bg-slate-800 transition-colors cursor-pointer">
+                Ping Server
+            </button>
+            <div id="result" class="mt-6 font-mono text-sm text-amber-600"></div>
+        </div>
+    </body>
+</html>

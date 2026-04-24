@@ -1,0 +1,53 @@
+# --- Environment & Secret Management ---
+.env
+.venv/
+.uv/
+node_modules/
+
+# --- Database (SQLite) ---
+# We ignore the local DB file so everyone starts with a clean slate
+*.db
+*.db-journal
+*.db-shm
+*.db-wal
+*.sqlite3
+
+# --- Tailwind CSS v4 ---
+# Ignore the standalone binary (it's OS-specific)
+tailwindcss
+# Ignore the generated CSS (it should be built via 'just dev' or in CI)
+src/static/output.css
+
+# --- Python Internals ---
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# --- Formatting & Tooling ---
+.ruff_cache/
+.djlint_cache/
+.pytest_cache/
+.mypy_cache/
+
+# --- Operating System Files ---
+.DS_Store
+Thumbs.db
+*.swp
