@@ -7,7 +7,7 @@ from sqlmodel import SQLModel
 
 from core.database import engine
 from core.logger import setup_logging
-from features.home.router import router as home_router
+from features.master_schedule.router import router as master_schedule_router
 from features.users.router import router as users_router
 
 setup_logging()
@@ -26,5 +26,5 @@ app = FastAPI(lifespan=lifespan)
 app.mount("/static", StaticFiles(directory="src/static"), name="static")
 
 # Include the vertical slices
-app.include_router(home_router)
 app.include_router(users_router)
+app.include_router(master_schedule_router)

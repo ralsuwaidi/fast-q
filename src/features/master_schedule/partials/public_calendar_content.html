@@ -1,0 +1,74 @@
+<div>
+  <h3 class="text-base font-semibold text-gray-900 dark:text-white">
+    {{ hospital_name }} Schedule
+  </h3>
+  <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
+    Available shifts and contact information by day.
+  </p>
+</div>
+
+<div class="mt-6 border-t border-gray-100 dark:border-white/10">
+  <dl class="divide-y divide-gray-100 dark:divide-white/10">
+
+    {% for day, shifts in schedule_by_day.items() %}
+    <div class="py-6 sm:grid sm:grid-cols-3 sm:gap-6 sm:items-center">
+
+      <dt class="text-sm font-medium text-gray-900 dark:text-white">
+        {{ day }}
+      </dt>
+
+      <dd class="mt-4 text-sm text-gray-700 dark:text-gray-300 sm:col-span-2 sm:mt-0">
+        <ul role="list"
+            class="divide-y divide-gray-100 dark:divide-white/10 rounded-lg border border-gray-200 dark:border-white/10">
+
+          {% for shift in shifts %}
+          <li class="flex items-center justify-between px-2 sm:px-4 py-4 hover:bg-gray-50 dark:hover:bg-white/5 transition">
+
+            <div class="flex items-center gap-2 sm:gap-4 flex-1 min-w-0">
+              <svg class="size-5 shrink-0 text-gray-400 hidden sm:block"
+                   fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                <path stroke-linecap="round" stroke-linejoin="round"
+                      d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+              </svg>
+
+              <div class="grid grid-cols-2 lg:grid-cols-4 gap-x-2 sm:gap-x-6 gap-y-1 w-full items-center">
+                
+                <span class="font-semibold text-gray-900 dark:text-white truncate">
+                  {{ shift.specialty }}
+                </span>
+
+                <span class="font-medium text-indigo-600 dark:text-indigo-400 truncate">
+                  {{ shift.physician }}
+                </span>
+
+                <span class="text-gray-500 text-sm lg:text-base truncate">
+                  {{ shift.time }}
+                </span>
+
+                <span class="text-gray-400 text-xs sm:text-sm truncate">
+                  {{ shift.email }}
+                </span>
+                
+              </div>
+            </div>
+
+            <div class="ml-2 sm:ml-4 shrink-0">
+              <button
+                type="button"
+                hx-post="/my-calendar/claim/{{ shift.id }}"
+                hx-swap="outerHTML"
+                class="rounded-md bg-white dark:bg-transparent font-medium text-indigo-600 hover:text-indigo-500 dark:text-indigo-400 dark:hover:text-indigo-300">
+                + Add
+              </button>
+            </div>
+
+          </li>
+          {% endfor %}
+
+        </ul>
+      </dd>
+    </div>
+    {% endfor %}
+
+  </dl>
+</div>

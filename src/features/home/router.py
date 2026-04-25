@@ -15,10 +15,5 @@ templates = Jinja2Templates(directory=[
 @router.get("/", response_class=HTMLResponse)
 async def home_page(request: Request, db: Session = Depends(get_session)):
     """Renders the main layout."""
-    return templates.TemplateResponse(request=request, name="index.html")
+    return templates.TemplateResponse(request=request, name="base.html")
 
-
-@router.post("/ping", response_class=HTMLResponse)
-async def ping_server():
-    """An HTMX endpoint returning a partial HTML snippet."""
-    return "<b>Pong!</b> The database is ready and HTMX is working."
