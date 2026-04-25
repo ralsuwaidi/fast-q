@@ -7,8 +7,10 @@ from core.database import get_session
 
 router = APIRouter()
 # Point Jinja exactly to this feature's template folder
-templates = Jinja2Templates(directory="src/features/home/templates")
-
+templates = Jinja2Templates(directory=[
+    "src/features/home/templates", 
+    "src/templates"                 
+])
 
 @router.get("/", response_class=HTMLResponse)
 async def home_page(request: Request, db: Session = Depends(get_session)):
