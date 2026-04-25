@@ -3,7 +3,7 @@ from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
 from sqlmodel import Session
 
-from src.core.database import get_session
+from core.database import get_session
 
 router = APIRouter()
 # Point Jinja exactly to this feature's template folder

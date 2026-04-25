@@ -4,8 +4,8 @@ from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 from sqlmodel import SQLModel
 
-from src.core.database import engine
-from src.features.home.router import router as home_router
+from core.database import engine
+from features.home.router import router as home_router
 
 
 @asynccontextmanager

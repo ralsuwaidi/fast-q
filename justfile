@@ -1,7 +1,7 @@
 # Run both the CSS watcher and the FastAPI server
 dev:
     @echo "Starting Development Environment..."
-    uv run uvicorn src.main:app --reload & \
+    PYTHONPATH=src uv run uvicorn src.main:app --reload & \
     ./tailwindcss -i ./src/static/input.css -o ./src/static/output.css --watch
 
 stop:
