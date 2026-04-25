@@ -2,10 +2,15 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
+from loguru import logger
 from sqlmodel import SQLModel
 
 from core.database import engine
+from core.logger import setup_logging
 from features.home.router import router as home_router
+from features.users.router import router as users_router
+
+setup_logging()
 
 
 @asynccontextmanager
@@ -22,3 +27,4 @@ app.mount("/static", StaticFiles(directory="src/static"), name="static")
 
 # Include the vertical slices
 app.include_router(home_router)
+app.include_router(users_router)

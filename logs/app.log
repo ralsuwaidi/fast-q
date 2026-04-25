@@ -1,0 +1,7 @@
+2026-04-25 10:07:32.280 | INFO     | logging:callHandlers:1744 - Started server process [37375]
+2026-04-25 10:07:32.281 | INFO     | logging:callHandlers:1744 - Waiting for application startup.
+2026-04-25 10:07:32.292 | INFO     | logging:callHandlers:1744 - Application startup complete.
+2026-04-25 10:09:21.904 | INFO     | logging:callHandlers:1744 - Shutting down
+2026-04-25 10:09:22.008 | INFO     | logging:callHandlers:1744 - Waiting for application shutdown.
+2026-04-25 10:09:22.009 | INFO     | logging:callHandlers:1744 - Application shutdown complete.
+2026-04-25 10:09:22.009 | INFO     | logging:callHandlers:1744 - Finished server process [37375]

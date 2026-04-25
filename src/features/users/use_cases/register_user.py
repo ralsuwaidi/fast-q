@@ -1,28 +1,36 @@
-# src/features/identity/use_cases/register_user.py
+from loguru import logger
+from pwdlib import PasswordHash
 from sqlmodel import Session
-from passlib.context import CryptContext
-from ..models import User
 
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+from ..commands import UserCommands
+from ..models import User
+from ..queries import UserQueries
+
+pwd_context = PasswordHash.recommended()
 
 class RegisterUserUseCase:
     def __init__(self, session: Session):
-        self.session = session
+        self.queries = UserQueries(session)
+        self.commands = UserCommands(session)
 
-    def execute(self, email: str, raw_password: str, full_name: str) -> User:
-        # 1. Hash the password
+    def execute(self, email: str, raw_password: str, full_name: str | None) -> User:
+        logger.info(f"Attempting to register new user: {email}")
+
+        if self.queries.email_exists(email):
+            logger.warning(f"Registration failed: Email {email} is already in use.")
+            raise ValueError("Email already registered")
+
+        logger.debug(f"Hashing password for {email}...")
         hashed_pwd = pwd_context.hash(raw_password)
         
-        # 2. Create the SQLModel record
-        user = User(
+        new_user = User(
             email=email, 
             hashed_password=hashed_pwd, 
             full_name=full_name
         )
         
-        # 3. Save to database
-        self.session.add(user)
-        self.session.commit()
-        self.session.refresh(user)
+        created_user = self.commands.create(new_user)
         
-        return user
+        logger.success(f"User {email} successfully registered with ID {created_user.id}")
+        
+        return created_user
