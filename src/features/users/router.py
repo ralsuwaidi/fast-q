@@ -1,11 +1,14 @@
-from fastapi import APIRouter, Request, Form, Depends
+from fastapi import APIRouter, Depends, Form, Request
 from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
-from sqlmodel import Session, select
 from pwdlib import PasswordHash
-from .queries import UserQueries
+from sqlmodel import Session
+
 from core.database import get_session
+
+from .commands import UserCommands
 from .models import User
+from .queries import UserQueries
 
 router = APIRouter()
 
@@ -39,7 +42,7 @@ async def register_user(
     if queries.email_exists(email):
         # Return an HTML snippet with Tailwind styling for an error
         return """
-        <div class="p-3 bg-red-50 text-red-700 border border-red-200 rounded-lg text-sm">
+        <div class="p-3 bg-red-50 animate-bounce text-red-700 border border-red-200 rounded-lg text-sm">
             That email is already registered. Please log in.
         </div>
         """
@@ -51,14 +54,12 @@ async def register_user(
         hashed_password=hashed_pwd, 
         full_name=full_name
     )
-    
-    db.add(new_user)
-    db.commit()
-    db.refresh(new_user)
+
+    user = UserCommands(db).create(new_user)
 
     # 3. Return a success message snippet
     # In a real app, you might also set an HTTP-only cookie here to log them in automatically
-    display_name = new_user.full_name if new_user.full_name else new_user.email
+    display_name = user.full_name if user.full_name else user.email
     return f"""
     <div class="p-4 bg-green-50 text-green-700 border border-green-200 rounded-lg text-center">
         <h3 class="font-bold mb-1">Account Created!</h3>
