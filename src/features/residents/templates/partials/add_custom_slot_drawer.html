@@ -1,8 +1,9 @@
+{% if not just_form_content %}
 <el-dialog>
   <dialog id="add-custom-slot-drawer" aria-labelledby="drawer-title" class="fixed inset-0 size-auto max-h-none max-w-none overflow-hidden bg-transparent backdrop:bg-transparent z-50">
     <div tabindex="0" class="absolute inset-0 pl-10 focus:outline-none sm:pl-16">
       <el-dialog-panel class="ml-auto block size-full max-w-md transform transition duration-500 ease-in-out data-closed:translate-x-full sm:duration-700">
-        <form hx-post="/my-calendar/custom-slot" hx-target="#add-custom-slot-form-content" hx-swap="innerHTML" class="relative flex h-full flex-col divide-y divide-gray-200 bg-white dark:bg-gray-900 dark:divide-white/10 shadow-xl">
+        <form action="/my-calendar/custom-slot" method="post" hx-post="/my-calendar/custom-slot" hx-target="#add-custom-slot-form-content" hx-swap="innerHTML" class="relative flex h-full flex-col divide-y divide-gray-200 bg-white dark:bg-gray-900 dark:divide-white/10 shadow-xl">
           <div class="flex min-h-0 flex-1 flex-col overflow-y-auto py-6">
             <div class="px-4 sm:px-6">
               <div class="flex items-start justify-between">
@@ -19,6 +20,12 @@
               </div>
             </div>
             <div id="add-custom-slot-form-content" class="relative mt-6 flex-1 px-4 sm:px-6">
+{% endif %}
+
+              {% if error_message %}
+                {{ error_message|safe }}
+              {% endif %}
+
               <div class="space-y-6">
                 <div>
                   <label for="hospital_name" class="block text-sm/6 font-medium text-gray-900 dark:text-white">Hospital</label>
@@ -83,6 +90,7 @@
                   </div>
                 </div>
               </div>
+{% if not just_form_content %}
             </div>
           </div>
           <div class="flex shrink-0 justify-end px-4 py-4 dark:bg-gray-900">
@@ -97,7 +105,17 @@
 {% if master_slot_id or selected_date %}
 <script>
   setTimeout(() => {
-    document.getElementById("add-custom-slot-drawer").showModal();
+    const dialog = document.getElementById("add-custom-slot-drawer");
+    if (dialog && !dialog.open) {
+      const openBtn = document.createElement("button");
+      openBtn.setAttribute("command", "show-modal");
+      openBtn.setAttribute("commandfor", "add-custom-slot-drawer");
+      openBtn.style.display = "none";
+      document.body.appendChild(openBtn);
+      openBtn.click();
+      openBtn.remove();
+    }
   }, 10);
 </script>
+{% endif %}
 {% endif %}

@@ -69,11 +69,11 @@ async def get_custom_slot_drawer(
 @router.post("/my-calendar/custom-slot", response_class=HTMLResponse)
 async def create_custom_slot(
     request: Request,
-    hospital_name: str = Form(...),
-    physician: str = Form(...),
-    time_block: str = Form(...),
-    contact_email: str = Form(...),
-    date: date = Form(...),
+    hospital_name: str | None = Form(None),
+    physician: str | None = Form(None),
+    time_block: str | None = Form(None),
+    contact_email: str | None = Form(None),
+    date: str | None = Form(None),
     specialty: str | None = Form(None),
     status: SlotStatus = Form(SlotStatus.to_contact),
     notes: str | None = Form(None),
@@ -83,13 +83,50 @@ async def create_custom_slot(
     if not current_user:
         return HTMLResponse("<span class='text-red-500 text-xs'>Please log in</span>", status_code=401)
         
+    errors = []
+    if not hospital_name: errors.append("Hospital is required.")
+    if not physician: errors.append("Physician is required.")
+    if not time_block: errors.append("Time Block is required.")
+    if not contact_email: errors.append("Contact Email is required.")
+    if not date: errors.append("Date is required.")
+    
+    from datetime import date as ddate
+    parsed_date = None
+    if date:
+        try:
+            parsed_date = ddate.fromisoformat(date)
+        except ValueError:
+            errors.append("Invalid date format.")
+            
+    if errors:
+        error_html = "<div class='mb-4 p-3 bg-red-50 text-red-700 text-sm rounded-md border border-red-200'>" + "<br>".join(errors) + "</div>"
+        
+        # We need to render the form content again, but with the errors and existing values
+        return templates.TemplateResponse(
+            request=request,
+            name="templates/partials/add_custom_slot_drawer.html",
+            context={
+                "hospital_name": hospital_name,
+                "master_slot": type('obj', (object,), {
+                    'physician': physician,
+                    'specialty': specialty,
+                    'contact_email': contact_email,
+                    'time_block': time_block
+                }),
+                "selected_date": parsed_date,
+                "time_block_override": time_block,
+                "error_message": error_html,
+                "just_form_content": True
+            }
+        )
+
     slot = BookedSlot(
         user_id=current_user.id,
         hospital_name=hospital_name,
         physician=physician,
         time_block=time_block,
         contact_email=contact_email,
-        date=date,
+        date=parsed_date,
         specialty=specialty,
         status=status,
         notes=notes
@@ -107,8 +144,12 @@ async def create_custom_slot(
     <script>
         setTimeout(() => {
             const drawer = document.getElementById("add-custom-slot-drawer");
-            if (drawer) drawer.close();
-            window.location.reload();
+            if (drawer) {
+                // If using el-dialog, we might need to click a close button
+                const closeBtn = drawer.querySelector('[command="close"]');
+                if (closeBtn) closeBtn.click();
+                else drawer.close();
+            }
         }, 1200);
     </script>
     """
