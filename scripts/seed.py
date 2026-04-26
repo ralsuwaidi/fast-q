@@ -49,11 +49,13 @@ class SlotStatus(str, enum.Enum):
 class BookedSlot(SQLModel, table=True):
     id: int | None = Field(default=None, primary_key=True)
     user_id: int = Field(foreign_key="user.id", index=True)
-    master_slot_id: int | None = Field(default=None, foreign_key="masterslot.id")
-    custom_title: str | None = Field(default=None)
-    custom_location: str | None = Field(default=None)
-    status: SlotStatus = Field(default=SlotStatus.to_contact)
+    hospital_name: str
     date: date
+    specialty: str | None = Field(default=None) 
+    physician: str
+    time_block: str 
+    contact_email: str
+    status: SlotStatus = Field(default=SlotStatus.to_contact)
     notes: str | None = Field(default=None)
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
@@ -120,22 +122,32 @@ def seed_data():
         print("🌱 Seeding Resident's Personal Bookings...")
         booking_1 = BookedSlot(
             user_id=resident_1.id, 
-            master_slot_id=slots[0].id, 
+            hospital_name=hosp_a.name,
+            physician="Dr. Dubeau",
+            specialty="Epilepsy",
+            time_block="AM",
+            contact_email="julie.gascon@muhc.mcgill.ca",
             status=SlotStatus.to_contact,
-            date=date(2026, 6, 10) 
+            date=date.today()
         )
         booking_2 = BookedSlot(
             user_id=resident_1.id, 
-            master_slot_id=slots[2].id, 
+            hospital_name=hosp_a.name,
+            physician="Dr. Harroud",
+            specialty="Neuroinflammatory",
+            time_block="PM",
+            contact_email="mariaangela.costa@muhc.mcgill.ca",
             status=SlotStatus.emailed,
             date=date(2026, 6, 21), 
             notes="Sent email asking for shadowing availability on Oct 12th."
         )
         booking_custom = BookedSlot(
             user_id=resident_1.id,
-            master_slot_id=None, 
-            custom_title="External Clinic Sync",
-            custom_location="Downtown Medical Center",
+            hospital_name=hosp_b.name,
+            physician="Dr. Custom",
+            specialty="External Clinic Sync",
+            time_block="AM",
+            contact_email="custom@mcgill.ca",
             status=SlotStatus.confirmed,
             date=date(2026, 6, 22), 
             notes="Approved by Dr. Allen."

@@ -21,23 +21,44 @@
             <div id="add-custom-slot-form-content" class="relative mt-6 flex-1 px-4 sm:px-6">
               <div class="space-y-6">
                 <div>
-                  <label for="custom_title" class="block text-sm/6 font-medium text-gray-900 dark:text-white">Title</label>
+                  <label for="hospital_name" class="block text-sm/6 font-medium text-gray-900 dark:text-white">Hospital</label>
                   <div class="mt-2">
-                    <input type="text" name="custom_title" id="custom_title" required class="block w-full rounded-md bg-white dark:bg-white/5 px-3 py-1.5 text-base text-gray-900 dark:text-white outline-1 -outline-offset-1 outline-gray-300 dark:outline-white/10 placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6">
+                    <input type="text" name="hospital_name" id="hospital_name" value="{{ hospital_name if hospital_name else '' }}" required class="block w-full rounded-md bg-white dark:bg-white/5 px-3 py-1.5 text-base text-gray-900 dark:text-white outline-1 -outline-offset-1 outline-gray-300 dark:outline-white/10 placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6">
                   </div>
                 </div>
 
                 <div>
-                  <label for="custom_location" class="block text-sm/6 font-medium text-gray-900 dark:text-white">Location</label>
+                  <label for="physician" class="block text-sm/6 font-medium text-gray-900 dark:text-white">Physician</label>
                   <div class="mt-2">
-                    <input type="text" name="custom_location" id="custom_location" class="block w-full rounded-md bg-white dark:bg-white/5 px-3 py-1.5 text-base text-gray-900 dark:text-white outline-1 -outline-offset-1 outline-gray-300 dark:outline-white/10 placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6">
+                    <input type="text" name="physician" id="physician" value="{{ master_slot.physician if master_slot else '' }}" required class="block w-full rounded-md bg-white dark:bg-white/5 px-3 py-1.5 text-base text-gray-900 dark:text-white outline-1 -outline-offset-1 outline-gray-300 dark:outline-white/10 placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6">
+                  </div>
+                </div>
+
+                <div>
+                  <label for="specialty" class="block text-sm/6 font-medium text-gray-900 dark:text-white">Specialty</label>
+                  <div class="mt-2">
+                    <input type="text" name="specialty" id="specialty" value="{{ master_slot.specialty if master_slot else '' }}" class="block w-full rounded-md bg-white dark:bg-white/5 px-3 py-1.5 text-base text-gray-900 dark:text-white outline-1 -outline-offset-1 outline-gray-300 dark:outline-white/10 placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6">
                   </div>
                 </div>
 
                 <div>
                   <label for="date" class="block text-sm/6 font-medium text-gray-900 dark:text-white">Date</label>
                   <div class="mt-2">
-                    <input type="date" name="date" id="date" required class="block w-full rounded-md bg-white dark:bg-white/5 px-3 py-1.5 text-base text-gray-900 dark:text-white outline-1 -outline-offset-1 outline-gray-300 dark:outline-white/10 placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6">
+                    <input type="date" name="date" id="date" value="{{ selected_date if selected_date else '' }}" required class="block w-full rounded-md bg-white dark:bg-white/5 px-3 py-1.5 text-base text-gray-900 dark:text-white outline-1 -outline-offset-1 outline-gray-300 dark:outline-white/10 placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6">
+                  </div>
+                </div>
+
+                <div>
+                  <label for="time_block" class="block text-sm/6 font-medium text-gray-900 dark:text-white">Time Block</label>
+                  <div class="mt-2">
+                    <input type="text" name="time_block" id="time_block" value="{{ time_block_override if time_block_override else (master_slot.time_block if master_slot else '') }}" required class="block w-full rounded-md bg-white dark:bg-white/5 px-3 py-1.5 text-base text-gray-900 dark:text-white outline-1 -outline-offset-1 outline-gray-300 dark:outline-white/10 placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6">
+                  </div>
+                </div>
+
+                <div>
+                  <label for="contact_email" class="block text-sm/6 font-medium text-gray-900 dark:text-white">Contact Email</label>
+                  <div class="mt-2">
+                    <input type="email" name="contact_email" id="contact_email" value="{{ master_slot.contact_email if master_slot else '' }}" required class="block w-full rounded-md bg-white dark:bg-white/5 px-3 py-1.5 text-base text-gray-900 dark:text-white outline-1 -outline-offset-1 outline-gray-300 dark:outline-white/10 placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6">
                   </div>
                 </div>
 
@@ -73,3 +94,10 @@
     </div>
   </dialog>
 </el-dialog>
+{% if master_slot_id or selected_date %}
+<script>
+  setTimeout(() => {
+    document.getElementById("add-custom-slot-drawer").showModal();
+  }, 10);
+</script>
+{% endif %}

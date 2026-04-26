@@ -18,13 +18,13 @@ class BookedSlot(SQLModel, table=True):
     # Links to the specific resident
     user_id: int = Field(foreign_key="user.id", index=True)
     
-    # Optional link to the public calendar. If it's None, it's a custom shift.
-    master_slot_id: int | None = Field(default=None, foreign_key="masterslot.id")
-    
-    # Fallback fields for custom slots (when master_slot_id is None)
-    custom_title: str | None = Field(default=None)
-    custom_location: str | None = Field(default=None)
+    # Copied from master slot
+    hospital_name: str
     date: date
+    specialty: str | None = Field(default=None) 
+    physician: str
+    time_block: str 
+    contact_email: str
     
     # Workflow Tracking 
     status: SlotStatus = Field(default=SlotStatus.to_contact)

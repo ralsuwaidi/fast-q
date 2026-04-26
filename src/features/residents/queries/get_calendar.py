@@ -4,7 +4,7 @@ from datetime import date
 
 from sqlmodel import Session, select
 
-from features.hospitals.models import MasterSlot
+
 from features.users.models import User
 
 from ..models import BookedSlot
@@ -24,16 +24,15 @@ class GetResidentCalendarHandler:
         """Executes the query to build the calendar context."""
         
         statement = (
-            select(BookedSlot, MasterSlot)
-            .join(MasterSlot, BookedSlot.master_slot_id == MasterSlot.id, isouter=True)
+            select(BookedSlot)
             .where(BookedSlot.user_id == query.user.id)
         )
         results = self.db.exec(statement).all()
 
         user_events = {}
-        for booked, master in results:
-            title = master.physician if master else booked.custom_title
-            specialty = master.specialty if master else (booked.custom_location or "Custom")
+        for booked in results:
+            title = booked.physician
+            specialty = booked.specialty or "Custom"
             
             event_date_str = booked.date.isoformat() if booked.date else None
             if not event_date_str:
@@ -42,13 +41,7 @@ class GetResidentCalendarHandler:
             if event_date_str not in user_events:
                 user_events[event_date_str] = []
             
-            time_str = "AM/PM"
-            if master:
-                time_str = master.time_block
-            elif booked.notes and "Claimed " in booked.notes:
-                time_str = booked.notes.replace("Claimed ", "").replace(" block.", "")
-            else:
-                time_str = "Custom"
+            time_str = booked.time_block
                 
             user_events[event_date_str].append({
                 "name": f"{title} ({specialty})",
