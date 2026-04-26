@@ -1,5 +1,5 @@
 import enum
-from datetime import datetime, timezone
+from datetime import date, datetime, timezone
 
 from pwdlib import PasswordHash
 from pydantic import EmailStr
@@ -53,6 +53,7 @@ class BookedSlot(SQLModel, table=True):
     custom_title: str | None = Field(default=None)
     custom_location: str | None = Field(default=None)
     status: SlotStatus = Field(default=SlotStatus.to_contact)
+    date: date
     notes: str | None = Field(default=None)
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
@@ -110,7 +111,7 @@ def seed_data():
             MasterSlot(hospital_id=hosp_a.id, day_of_week="Monday", specialty="Epilepsy", physician="Dr. Dubeau", time_block="AM/PM", contact_email="julie.gascon@muhc.mcgill.ca"),
             MasterSlot(hospital_id=hosp_a.id, day_of_week="Monday", specialty="Psychiatry", physician="Dr. Trounce", time_block="AM/PM", contact_email="beatrice.stoklas@muhc.mcgill.ca"),
             MasterSlot(hospital_id=hosp_a.id, day_of_week="Tuesday", specialty="Neuroinflammatory", physician="Dr. Harroud", time_block="AM/PM", contact_email="mariaangela.costa@muhc.mcgill.ca"),
-            MasterSlot(hospital_id=hosp_b.id, day_of_week="Wednesday", specialty="Neuromuscular", physician="Dr. O'Ferral", time_block="AM/PM", contact_email="erin.oferrall@mcgill.ca"),
+            MasterSlot(hospital_id=hosp_b.id, day_of_week="Wednesday", specialty="Neuromuscular", physician="Dr. O'Ferral", time_block="AM", contact_email="erin.oferrall@mcgill.ca"),
             MasterSlot(hospital_id=hosp_b.id, day_of_week="Thursday", specialty="General Neurology", physician="Dr. Durcan", time_block="AM/PM", contact_email="jocelyn.bigot@muhc.mcgill.ca")
         ]
         session.add_all(slots)
@@ -120,12 +121,14 @@ def seed_data():
         booking_1 = BookedSlot(
             user_id=resident_1.id, 
             master_slot_id=slots[0].id, 
-            status=SlotStatus.to_contact
+            status=SlotStatus.to_contact,
+            date=date(2026, 6, 10) 
         )
         booking_2 = BookedSlot(
             user_id=resident_1.id, 
             master_slot_id=slots[2].id, 
             status=SlotStatus.emailed,
+            date=date(2026, 6, 21), 
             notes="Sent email asking for shadowing availability on Oct 12th."
         )
         booking_custom = BookedSlot(
@@ -134,6 +137,7 @@ def seed_data():
             custom_title="External Clinic Sync",
             custom_location="Downtown Medical Center",
             status=SlotStatus.confirmed,
+            date=date(2026, 6, 22), 
             notes="Approved by Dr. Allen."
         )
 

@@ -1,5 +1,7 @@
+from datetime import date
+
 from fastapi import APIRouter, Depends, Query, Request
-from fastapi.responses import HTMLResponse
+from fastapi.responses import HTMLResponse, Response
 from fastapi.templating import Jinja2Templates
 from sqlmodel import Session
 
@@ -41,6 +43,7 @@ async def home_page(
 async def claim_shift(
     master_slot_id: int, 
     time_block: str = Query(...), 
+    selected_date: date = Query(...),
     db: Session = Depends(get_session),
     current_user: User | None = Depends(get_current_user)
 ):
@@ -51,18 +54,23 @@ async def claim_shift(
     command = ClaimShiftCommand(
         user_id=current_user.id,
         master_slot_id=master_slot_id,
-        time_block=time_block
+        time_block=time_block,
+        date=selected_date
     )
     
     # 2. Execute via Handler
     handler = ClaimShiftHandler(db)
     handler.execute(command)
 
-    # 3. Return HTMX Response
-    return HTMLResponse(
+    res = Response(
         content=f"""
-        <span class="inline-flex items-center rounded-full bg-green-50 px-2.5 py-0.5 text-xs font-semibold text-green-700 ring-1 ring-inset ring-green-600/20">
+        <span class="inline-flex items-center rounded-full bg-green-50 px-2.5 py-0.5 text-xs font-semibold text-green-700">
             ✓ Added {time_block}
         </span>
-        """
+        """,
+        media_type="text/html"
     )
+
+    res.headers["HX-Trigger"] = "calendarUpdated"
+
+    return res

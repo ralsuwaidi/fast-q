@@ -1,5 +1,5 @@
 import enum
-from datetime import datetime, timezone
+from datetime import date, datetime, timezone
 
 from sqlmodel import Field, SQLModel
 
@@ -24,6 +24,7 @@ class BookedSlot(SQLModel, table=True):
     # Fallback fields for custom slots (when master_slot_id is None)
     custom_title: str | None = Field(default=None)
     custom_location: str | None = Field(default=None)
+    date: date
     
     # Workflow Tracking 
     status: SlotStatus = Field(default=SlotStatus.to_contact)
