@@ -18,7 +18,6 @@ class User(SQLModel, table=True):
     hashed_password: str
     full_name: str | None = Field(default=None)
     
-    # NEW: Added role differentiation
     role: UserRole = Field(default=UserRole.resident)
     
     is_active: bool = Field(default=True)

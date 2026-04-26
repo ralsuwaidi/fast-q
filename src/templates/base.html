@@ -116,11 +116,24 @@
                     </li>
 
                     <li class="-mx-6 mt-auto">
-                        <a href="/profile" class="flex items-center gap-x-4 px-6 py-3 text-sm/6 font-semibold text-gray-900 hover:bg-gray-50 dark:text-white dark:hover:bg-white/5">
-                            <div class="size-8 rounded-full bg-indigo-600 flex items-center justify-center text-white font-bold">DR</div>
-                            <span class="sr-only">Your profile</span>
-                            <span aria-hidden="true">Dr. Resident</span>
-                        </a>
+                        {% if current_user %}
+                            <a href="/profile" class="flex items-center gap-x-4 px-6 py-3 text-sm/6 font-semibold text-gray-900 hover:bg-gray-50 dark:text-white dark:hover:bg-white/5">
+                                <div class="size-8 rounded-full bg-indigo-600 flex items-center justify-center text-white font-bold text-xs uppercase">
+                                    {{ current_user.full_name[0:2] if current_user.full_name else current_user.email[0:2] }}
+                                </div>
+                                <span class="sr-only">Your profile</span>
+                                <span aria-hidden="true" class="truncate">{{ current_user.full_name or current_user.email }}</span>
+                            </a>
+                        {% else %}
+                            <a href="/login" class="flex items-center gap-x-4 px-6 py-3 text-sm/6 font-semibold text-gray-900 hover:bg-gray-50 dark:text-white dark:hover:bg-white/5">
+                                <div class="size-8 rounded-full bg-gray-100 dark:bg-white/10 flex items-center justify-center text-gray-500 dark:text-gray-400">
+                                    <svg class="size-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0 0 13.5 3h-6a2.25 2.25 0 0 0-2.25 2.25v13.5A2.25 2.25 0 0 0 7.5 21h6a2.25 2.25 0 0 0 2.25-2.25V15M12 9l-3 3m0 0 3 3m-3-3h12.75" />
+                                    </svg>
+                                </div>
+                                <span aria-hidden="true">Log in</span>
+                            </a>
+                        {% endif %}
                     </li>
                 </ul>
             </nav>

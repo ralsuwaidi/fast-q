@@ -20,3 +20,20 @@ format:
 lint:
     uv tool run ruff check .
     uv run djlint src/ --lint
+
+# Seed the database with sample data
+seed:
+    @echo "Seeding the database..."
+    PYTHONPATH=src uv run python scripts/seed.py
+
+# Wipe the SQLite database and re-seed it from scratch
+reset-db:
+    @echo "Destroying current database..."
+    rm -f database.db
+    @echo "Rebuilding and seeding..."
+    PYTHONPATH=src uv run python scripts/seed.py
+
+# Inspect the current contents of the database
+inspect:
+	@echo "🔍 Inspecting Database..."
+	PYTHONPATH=src uv run python scripts/inspect_db.py

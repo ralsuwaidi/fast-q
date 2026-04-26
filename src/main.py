@@ -7,7 +7,7 @@ from sqlmodel import SQLModel
 
 from core.database import engine
 from core.logger import setup_logging
-from features.master_schedule.router import router as master_schedule_router
+from features.hospitals.router import router as hospitals_router
 from features.residents.router import router as residents_router
 from features.users.router import router as users_router
 
@@ -29,4 +29,4 @@ app.mount("/static", StaticFiles(directory="src/static"), name="static")
 # Include the vertical slices
 app.include_router(users_router)
 app.include_router(residents_router)
-app.include_router(master_schedule_router)
+app.include_router(hospitals_router)

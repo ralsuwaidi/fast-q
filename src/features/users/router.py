@@ -1,5 +1,5 @@
-from fastapi import APIRouter, Depends, Form, Request
-from fastapi.responses import HTMLResponse
+from fastapi import APIRouter, Depends, Form, Request, Response
+from fastapi.responses import HTMLResponse, Response
 from fastapi.templating import Jinja2Templates
 from pwdlib import PasswordHash
 from sqlmodel import Session
@@ -12,57 +12,57 @@ from .queries import UserQueries
 
 router = APIRouter()
 
-# Tell Jinja to look in the local feature folder FIRST, then the global folder
 templates = Jinja2Templates(directory=[
     "src/features/users/templates",
     "src/templates"
 ])
 
-# Password hashing configuration
 pwd_context = PasswordHash.recommended()
 
 
-@router.get("/register", response_class=HTMLResponse)
-async def register_page(request: Request):
-    """Serves the registration page UI."""
-    return templates.TemplateResponse(request=request, name="register.html")
+# ==========================================
+# LOGIN
+# ==========================================
+@router.get("/login", response_class=HTMLResponse)
+async def login_page(request: Request):
+    """Serves the login page UI."""
+    return templates.TemplateResponse(request=request, name="login.html")
 
 
-@router.post("/register", response_class=HTMLResponse)
-async def register_user(
+@router.post("/login", response_class=HTMLResponse)
+async def process_login(
+    response: Response,
     email: str = Form(...),
     password: str = Form(...),
-    full_name: str = Form(None),
     db: Session = Depends(get_session)
 ):
-    """Handles the HTMX form submission for creating a new user."""
+    """Handles the HTMX form submission for logging in."""
     queries = UserQueries(db)
     
-    # 1. Check if user already exists
-    if queries.email_exists(email):
-        # Return an HTML snippet with Tailwind styling for an error
-        return """
-        <div class="p-3 bg-red-50 animate-bounce text-red-700 border border-red-200 rounded-lg text-sm">
-            That email is already registered. Please log in.
-        </div>
-        """
-
-    # 2. Hash password and create the user record
-    hashed_pwd = pwd_context.hash(password)
-    new_user = User(
-        email=email, 
-        hashed_password=hashed_pwd, 
-        full_name=full_name
+    # 1. Fetch user using your existing class method
+    user = queries.get_by_email(email)
+    
+    # 2. Verify user exists AND password hash matches
+    if not user or not pwd_context.verify(password, user.hashed_password):
+        # Return the error snippet styled to match your existing design
+        return HTMLResponse(
+            content="""
+            <div class="p-3 bg-red-50 text-red-700 border border-red-200 rounded-lg text-sm text-center">
+                Invalid email or password.
+            </div>
+            """, 
+            status_code=400
+        )
+    
+    # 3. Success! Set the HTTP-only cookie
+    response.set_cookie(key="user_session", value=str(user.id), httponly=True)
+    
+    # 4. Trigger HTMX to redirect to the main schedule
+    res = Response(
+        status_code=200,
+        headers={"HX-Redirect": "/mgh"},
     )
+    res.set_cookie(key="user_session", value=str(user.id), httponly=True)
 
-    user = UserCommands(db).create(new_user)
+    return res
 
-    # 3. Return a success message snippet
-    # In a real app, you might also set an HTTP-only cookie here to log them in automatically
-    display_name = user.full_name if user.full_name else user.email
-    return f"""
-    <div class="p-4 bg-green-50 text-green-700 border border-green-200 rounded-lg text-center">
-        <h3 class="font-bold mb-1">Account Created!</h3>
-        <p class="text-sm">Welcome to Fast-Q, {display_name}.</p>
-    </div>
-    """

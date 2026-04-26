@@ -1,5 +1,7 @@
 from sqlmodel import Session, select
+
 from .models import User
+
 
 class UserQueries:
     """Encapsulates all database interactions for the Users slice."""
