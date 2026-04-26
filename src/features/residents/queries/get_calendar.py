@@ -33,15 +33,26 @@ class GetResidentCalendarHandler:
         user_events = {}
         for booked, master in results:
             title = master.physician if master else booked.custom_title
-            specialty = master.specialty if master else "Custom"
-            day = master.day_of_week if master else "Monday" 
+            specialty = master.specialty if master else (booked.custom_location or "Custom")
             
-            if day not in user_events:
-                user_events[day] = []
+            event_date_str = booked.date.isoformat() if booked.date else None
+            if not event_date_str:
+                continue
+            
+            if event_date_str not in user_events:
+                user_events[event_date_str] = []
+            
+            time_str = "AM/PM"
+            if master:
+                time_str = master.time_block
+            elif booked.notes and "Claimed " in booked.notes:
+                time_str = booked.notes.replace("Claimed ", "").replace(" block.", "")
+            else:
+                time_str = "Custom"
                 
-            user_events[day].append({
+            user_events[event_date_str].append({
                 "name": f"{title} ({specialty})",
-                "time": booked.notes.replace("Claimed ", "").replace(" block.", "") if booked.notes else "AM/PM",
+                "time": time_str,
                 "status": booked.status
             })
 
@@ -52,13 +63,13 @@ class GetResidentCalendarHandler:
         
         calendar_days = []
         for d in flat_days:
-            day_name = d.strftime("%A") 
-            events_for_day = user_events.get(day_name, [])
+            date_str = d.isoformat()
+            events_for_day = user_events.get(date_str, [])
 
             calendar_days.append({
                 "date_obj": d,
                 "day_str": str(d.day),         
-                "datetime_str": d.isoformat(), 
+                "datetime_str": date_str, 
                 "is_current_month": d.month == today.month,
                 "is_today": d == today,
                 "is_selected": d == today,

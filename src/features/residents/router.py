@@ -1,6 +1,6 @@
 from datetime import date
 
-from fastapi import APIRouter, Depends, Query, Request
+from fastapi import APIRouter, Depends, Query, Request, Form
 from fastapi.responses import HTMLResponse, Response
 from fastapi.templating import Jinja2Templates
 from sqlmodel import Session
@@ -11,6 +11,7 @@ from features.residents.commands.claim_shift import (ClaimShiftCommand,
                                                      ClaimShiftHandler)
 from features.residents.queries.get_calendar import (
     GetResidentCalendarHandler, GetResidentCalendarQuery)
+from features.residents.models import BookedSlot, SlotStatus
 from features.users.models import User
 
 router = APIRouter()
@@ -43,7 +44,7 @@ async def home_page(
 async def claim_shift(
     master_slot_id: int, 
     time_block: str = Query(...), 
-    selected_date: date = Query(...),
+    selected_date: date = Form(...),
     db: Session = Depends(get_session),
     current_user: User | None = Depends(get_current_user)
 ):
@@ -73,4 +74,33 @@ async def claim_shift(
 
     res.headers["HX-Trigger"] = "calendarUpdated"
 
+    return res
+
+@router.post("/my-calendar/custom-slot", response_class=HTMLResponse)
+async def create_custom_slot(
+    request: Request,
+    custom_title: str = Form(...),
+    custom_location: str = Form(None),
+    date: date = Form(...),
+    status: SlotStatus = Form(SlotStatus.to_contact),
+    notes: str = Form(None),
+    db: Session = Depends(get_session),
+    current_user: User | None = Depends(get_current_user)
+):
+    if not current_user:
+        return HTMLResponse("<span class='text-red-500 text-xs'>Please log in</span>", status_code=401)
+    
+    slot = BookedSlot(
+        user_id=current_user.id,
+        custom_title=custom_title,
+        custom_location=custom_location,
+        date=date,
+        status=status,
+        notes=notes
+    )
+    db.add(slot)
+    db.commit()
+    
+    res = Response(content="<div class='p-4 text-green-600 font-semibold'>Slot created successfully!</div>", media_type="text/html")
+    res.headers["HX-Refresh"] = "true"
     return res
