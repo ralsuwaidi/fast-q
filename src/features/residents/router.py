@@ -1,4 +1,5 @@
-from datetime import date
+# src/features/residents/router.py
+from datetime import date as ddate
 
 from fastapi import APIRouter, Depends, Form, Query, Request
 from fastapi.responses import HTMLResponse, Response
@@ -7,11 +8,15 @@ from sqlmodel import Session
 
 from core.auth import get_current_user
 from core.database import get_session
-from features.residents.commands.claim_shift import (ClaimShiftCommand,
-                                                     ClaimShiftHandler)
-from features.residents.models import BookedSlot, SlotStatus
+# Import Commands
+from features.residents.commands.create_custom_slot import (
+    CreateCustomSlotCommand, CreateCustomSlotHandler)
+from features.residents.models import SlotStatus
+# Import Queries
 from features.residents.queries.get_calendar import (
     GetResidentCalendarHandler, GetResidentCalendarQuery)
+from features.residents.queries.get_custom_slot_form import (
+    GetCustomSlotFormHandler, GetCustomSlotFormQuery)
 from features.users.models import User
 
 router = APIRouter()
@@ -26,12 +31,8 @@ async def home_page(
     if not current_user:
         return Response(status_code=302, headers={"Location": "/login"})
 
-    # 1. Create the Query
     query = GetResidentCalendarQuery(user=current_user)
-    
-    # 2. Execute via Handler
-    handler = GetResidentCalendarHandler(db)
-    template_context = handler.execute(query)
+    template_context = GetResidentCalendarHandler(db).execute(query)
 
     return templates.TemplateResponse(
         request=request, 
@@ -45,26 +46,25 @@ async def get_custom_slot_drawer(
     request: Request,
     master_slot_id: int | None = Query(None),
     time_block: str | None = Query(None),
-    selected_date: date | None = Query(None),
+    selected_date: ddate | None = Query(None),
     db: Session = Depends(get_session)
 ):
-    from features.hospitals.models import MasterSlot
-    
-    master_slot = None
-    if master_slot_id:
-        master_slot = db.get(MasterSlot, master_slot_id)
+    # Dispatch Query
+    query = GetCustomSlotFormQuery(master_slot_id=master_slot_id)
+    form_data = GetCustomSlotFormHandler(db).execute(query)
         
     return templates.TemplateResponse(
         request=request,
         name="templates/partials/add_custom_slot_drawer.html",
         context={
-            "master_slot": master_slot,
-            "hospital_name": master_slot.hospital.name if master_slot and master_slot.hospital else None,
+            "master_slot": form_data["master_slot"],
+            "hospital_name": form_data["hospital_name"],
             "master_slot_id": master_slot_id,
             "time_block_override": time_block,
             "selected_date": selected_date
         }
     )
+
 
 @router.post("/my-calendar", response_class=HTMLResponse)
 async def create_custom_slot(
@@ -83,6 +83,7 @@ async def create_custom_slot(
     if not current_user:
         return HTMLResponse("<span class='text-red-500 text-xs'>Please log in</span>", status_code=401)
         
+    # --- 1. Router Level Validation ---
     errors = []
     if not hospital_name: errors.append("Hospital is required.")
     if not physician: errors.append("Physician is required.")
@@ -90,7 +91,6 @@ async def create_custom_slot(
     if not contact_email: errors.append("Contact Email is required.")
     if not date: errors.append("Date is required.")
     
-    from datetime import date as ddate
     parsed_date = None
     if date:
         try:
@@ -116,8 +116,8 @@ async def create_custom_slot(
             }
         )
 
-    # Save to Database
-    slot = BookedSlot(
+    # --- 2. Dispatch Command (Write) ---
+    command = CreateCustomSlotCommand(
         user_id=current_user.id,
         hospital_name=hospital_name,
         physician=physician,
@@ -128,21 +128,18 @@ async def create_custom_slot(
         status=status,
         notes=notes
     )
-    db.add(slot)
-    db.commit()
+    CreateCustomSlotHandler(db).execute(command)
     
+    # --- 3. Dispatch Query (Read) ---
     query = GetResidentCalendarQuery(user=current_user)
-    handler = GetResidentCalendarHandler(db)
-    template_context = handler.execute(query)
+    template_context = GetResidentCalendarHandler(db).execute(query)
 
-    # 2. Render the full calendar template
+    # --- 4. Return Response ---
     response = templates.TemplateResponse(
         request=request, 
         name="templates/calendar.html",
         context=template_context
     )
-
-    # 3. Keep the trigger so the frontend knows to close the drawer
     response.headers["HX-Trigger"] = "slotCreated"
 
     return response
