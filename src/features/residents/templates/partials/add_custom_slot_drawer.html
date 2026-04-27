@@ -1,9 +1,17 @@
 {% if not just_form_content %}
+<div id="calendar-container">
 <el-dialog>
   <dialog id="add-custom-slot-drawer" aria-labelledby="drawer-title" class="fixed inset-0 size-auto max-h-none max-w-none overflow-hidden bg-transparent backdrop:bg-transparent z-50">
     <div tabindex="0" class="absolute inset-0 pl-10 focus:outline-none sm:pl-16">
       <el-dialog-panel class="ml-auto block size-full max-w-md transform transition duration-500 ease-in-out data-closed:translate-x-full sm:duration-700">
-        <form action="/my-calendar/custom-slot" method="post" hx-post="/my-calendar/custom-slot" hx-target="#add-custom-slot-form-content" hx-swap="innerHTML" class="relative flex h-full flex-col divide-y divide-gray-200 bg-white dark:bg-gray-900 dark:divide-white/10 shadow-xl">
+
+        <form hx-post="/my-calendar/custom-slot" 
+              hx-target="#add-custom-slot-form-content" 
+              method="post"
+              action="/my-calendar/custom-slot"
+              hx-swap="innerHTML"
+              hx-on::after-request="if(event.detail.successful) this.reset()"
+              class="relative flex h-full flex-col divide-y divide-gray-200 bg-white dark:bg-gray-900 dark:divide-white/10 shadow-xl">
           <div class="flex min-h-0 flex-1 flex-col overflow-y-auto py-6">
             <div class="px-4 sm:px-6">
               <div class="flex items-start justify-between">
@@ -102,20 +110,32 @@
     </div>
   </dialog>
 </el-dialog>
+</div>
+
 {% if master_slot_id or selected_date %}
 <script>
-  setTimeout(() => {
-    const dialog = document.getElementById("add-custom-slot-drawer");
-    if (dialog && !dialog.open) {
-      const openBtn = document.createElement("button");
-      openBtn.setAttribute("command", "show-modal");
-      openBtn.setAttribute("commandfor", "add-custom-slot-drawer");
-      openBtn.style.display = "none";
-      document.body.appendChild(openBtn);
-      openBtn.click();
-      openBtn.remove();
-    }
-  }, 10);
+document.body.addEventListener("slotCreated", () => {
+  // Close drawer
+  const drawer = document.getElementById("add-custom-slot-drawer");
+  if (drawer) {
+    const closeBtn = drawer.querySelector('[command="close"]');
+    if (closeBtn) closeBtn.click();
+  }
+
+  // Refresh ONLY the calendar (better UX)
+  htmx.ajax('GET', '/my-calendar', {
+    target: '#calendar-container',
+    swap: 'innerHTML'
+  });
+
+  // Optional: show toast
+  const toast = document.createElement("div");
+  toast.className = "fixed top-4 right-4 bg-green-600 text-white px-4 py-2 rounded shadow";
+  toast.innerText = "Slot created successfully";
+  document.body.appendChild(toast);
+
+  setTimeout(() => toast.remove(), 2000);
+});
 </script>
 {% endif %}
 {% endif %}

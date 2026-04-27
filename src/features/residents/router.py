@@ -1,6 +1,6 @@
 from datetime import date
 
-from fastapi import APIRouter, Depends, Query, Request, Form
+from fastapi import APIRouter, Depends, Form, Query, Request
 from fastapi.responses import HTMLResponse, Response
 from fastapi.templating import Jinja2Templates
 from sqlmodel import Session
@@ -9,9 +9,9 @@ from core.auth import get_current_user
 from core.database import get_session
 from features.residents.commands.claim_shift import (ClaimShiftCommand,
                                                      ClaimShiftHandler)
+from features.residents.models import BookedSlot, SlotStatus
 from features.residents.queries.get_calendar import (
     GetResidentCalendarHandler, GetResidentCalendarQuery)
-from features.residents.models import BookedSlot, SlotStatus
 from features.users.models import User
 
 router = APIRouter()
@@ -134,23 +134,12 @@ async def create_custom_slot(
     db.add(slot)
     db.commit()
     
-    html_content = """
+    response = HTMLResponse("""
     <div class='p-4 text-green-600 font-semibold text-center'>
-        <svg class="mx-auto size-12 text-green-500 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-        </svg>
-        Slot created successfully!
+        ✅ Slot created successfully!
     </div>
-    <script>
-        setTimeout(() => {
-            const drawer = document.getElementById("add-custom-slot-drawer");
-            if (drawer) {
-                // If using el-dialog, we might need to click a close button
-                const closeBtn = drawer.querySelector('[command="close"]');
-                if (closeBtn) closeBtn.click();
-                else drawer.close();
-            }
-        }, 1200);
-    </script>
-    """
-    return HTMLResponse(content=html_content)
+    """)
+
+    response.headers["HX-Trigger"] = "slotCreated"
+
+    return response
