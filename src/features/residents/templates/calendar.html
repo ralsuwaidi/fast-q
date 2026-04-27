@@ -6,11 +6,33 @@
 
 <div id="calendar-container" class="lg:flex lg:h-full lg:flex-col">
   
-  <header class="flex items-center justify-between border-b border-gray-200 px-6 py-4 lg:flex-none dark:border-white/10 dark:bg-gray-800/50">
+<header class="flex items-center justify-between border-b border-gray-200 px-6 py-4 lg:flex-none dark:border-white/10 dark:bg-gray-800/50">
     <h1 class="text-base font-semibold text-gray-900 dark:text-white">
-      <time datetime="2022-01">{{ current_month_name }}</time>
+      <time datetime="{{ current_view_date }}">{{ current_month_name }}</time>
     </h1>
     <div class="flex items-center">
+      
+      <div class="relative flex items-center rounded-md bg-white shadow-xs md:items-stretch dark:bg-white/5 mr-4">
+        <button type="button" 
+                hx-get="/my-calendar?view_date={{ prev_month_date }}"
+                hx-target="#calendar-container"
+                hx-select="#calendar-container"
+                hx-swap="outerHTML"
+                class="flex h-9 w-12 items-center justify-center rounded-l-md border-y border-l border-gray-300 pr-1 text-gray-400 hover:text-gray-500 focus:relative md:w-9 md:pr-0 md:hover:bg-gray-50 dark:border-white/10 dark:hover:bg-white/10">
+          <span class="sr-only">Previous month</span>
+          <svg class="size-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M11.78 5.22a.75.75 0 0 1 0 1.06L8.06 10l3.72 3.72a.75.75 0 1 1-1.06 1.06l-4.25-4.25a.75.75 0 0 1 0-1.06l4.25-4.25a.75.75 0 0 1 1.06 0Z" clip-rule="evenodd" /></svg>
+        </button>
+        <button type="button" 
+                hx-get="/my-calendar?view_date={{ next_month_date }}"
+                hx-target="#calendar-container"
+                hx-select="#calendar-container"
+                hx-swap="outerHTML"
+                class="flex h-9 w-12 items-center justify-center rounded-r-md border-y border-r border-gray-300 pl-1 text-gray-400 hover:text-gray-500 focus:relative md:w-9 md:pl-0 md:hover:bg-gray-50 dark:border-white/10 dark:hover:bg-white/10">
+          <span class="sr-only">Next month</span>
+          <svg class="size-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M8.22 5.22a.75.75 0 0 1 1.06 0l4.25 4.25a.75.75 0 0 1 0 1.06l-4.25 4.25a.75.75 0 0 1-1.06-1.06L11.94 10 8.22 6.28a.75.75 0 0 1 0-1.06Z" clip-rule="evenodd" /></svg>
+        </button>
+      </div>
+
       <button command="show-modal" commandfor="add-custom-slot-drawer" class="ml-4 flex items-center justify-center rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-xs hover:bg-indigo-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">
         <svg class="mr-1.5 size-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
           <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
@@ -40,7 +62,7 @@
             {{ day.day_str }}
           </time>
           
-{% if day.events %}
+          {% if day.events %}
           <ol class="mt-2">
             {% for event in day.events %}
             <li>
@@ -55,6 +77,8 @@
             </li>
             {% endfor %}
           </ol>
+          {% else %}
+          <p class="text-gray-500 dark:text-gray-400 min-h-16">&nbsp;</p>
           {% endif %}
 
         </div>
@@ -65,14 +89,14 @@
         {% for day in calendar_days %}
         
         <button type="button" 
-                hx-get="/my-calendar?selected_date={{ day.datetime_str }}"
+                hx-get="/my-calendar?selected_date={{ day.datetime_str }}&view_date={{ current_view_date }}"
                 hx-target="#calendar-container"
                 hx-select="#calendar-container"
                 hx-swap="outerHTML"
                 {% if day.is_current_month %}data-is-current-month{% endif %} 
                 {% if day.is_today %}data-is-today{% endif %} 
                 {% if day.is_selected %}data-is-selected{% endif %}
-                class="group relative flex h-14 flex-col px-3 py-2 not-data-is-current-month:bg-gray-50 not-data-is-selected:not-data-is-current-month:not-data-is-today:text-gray-500 hover:bg-gray-100 focus:z-10 data-is-current-month:bg-white not-data-is-selected:data-is-current-month:not-data-is-today:text-gray-900 data-is-current-month:hover:bg-gray-100 data-is-selected:font-semibold data-is-selected:text-white data-is-today:font-semibold not-data-is-selected:data-is-today:text-indigo-600 dark:not-data-is-current-month:bg-gray-900 dark:not-data-is-selected:not-data-is-current-month:not-data-is-today:text-gray-400 dark:not-data-is-current-month:before:pointer-events-none dark:not-data-is-current-month:before:absolute dark:not-data-is-current-month:before:inset-0 dark:not-data-is-current-month:before:bg-gray-800/50 dark:hover:bg-gray-900/50 dark:data-is-current-month:bg-gray-900 dark:not-data-is-selected:data-is-current-month:not-data-is-today:text-white dark:data-is-current-month:hover:bg-gray-900/50 dark:not-data-is-selected:data-is-today:text-indigo-400">
+                class="group cursor-pointer relative flex h-14 flex-col px-3 py-2 not-data-is-current-month:bg-gray-50 not-data-is-selected:not-data-is-current-month:not-data-is-today:text-gray-500 hover:bg-gray-100 focus:z-10 data-is-current-month:bg-white not-data-is-selected:data-is-current-month:not-data-is-today:text-gray-900 data-is-current-month:hover:bg-gray-100 data-is-selected:font-semibold data-is-selected:text-white data-is-today:font-semibold not-data-is-selected:data-is-today:text-indigo-600 dark:not-data-is-current-month:bg-gray-900 dark:not-data-is-selected:not-data-is-current-month:not-data-is-today:text-gray-400 dark:not-data-is-current-month:before:pointer-events-none dark:not-data-is-current-month:before:absolute dark:not-data-is-current-month:before:inset-0 dark:not-data-is-current-month:before:bg-gray-800/50 dark:hover:bg-gray-900/50 dark:data-is-current-month:bg-gray-900 dark:not-data-is-selected:data-is-current-month:not-data-is-today:text-white dark:data-is-current-month:hover:bg-gray-900/50 dark:not-data-is-selected:data-is-today:text-indigo-400">
           <time datetime="{{ day.datetime_str }}" class="ml-auto group-not-data-is-current-month:opacity-75 in-data-is-selected:flex in-data-is-selected:size-6 in-data-is-selected:items-center in-data-is-selected:justify-center in-data-is-selected:rounded-full in-data-is-selected:not-in-data-is-today:bg-gray-900 in-data-is-selected:in-data-is-today:bg-indigo-600 dark:in-data-is-selected:not-in-data-is-today:bg-white dark:in-data-is-selected:not-in-data-is-today:text-gray-900 dark:in-data-is-selected:in-data-is-today:bg-indigo-500">
             {{ day.day_str }}
           </time>

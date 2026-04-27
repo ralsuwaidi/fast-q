@@ -35,15 +35,18 @@ templates = Jinja2Templates(directory=["src/features/residents", "src/templates"
 @router.get("/my-calendar", response_class=HTMLResponse)
 async def home_page(
     request: Request,
-    selected_date: ddate | None = Query(None),  # <--- ADD THIS
+    selected_date: ddate | None = Query(None),
+    view_date: ddate | None = Query(None),
     db: Session = Depends(get_session),
     current_user: User | None = Depends(get_current_user),
 ):
     if not current_user:
         return Response(status_code=302, headers={"Location": "/login"})
 
-    # Pass the selected_date to the query
-    query = GetResidentCalendarQuery(user=current_user, selected_date=selected_date)
+    # Pass BOTH parameters to your query
+    query = GetResidentCalendarQuery(
+        user=current_user, selected_date=selected_date, view_date=view_date
+    )
     template_context = GetResidentCalendarHandler(db).execute(query)
 
     return templates.TemplateResponse(
