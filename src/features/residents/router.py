@@ -66,7 +66,7 @@ async def get_custom_slot_drawer(
         }
     )
 
-@router.post("/my-calendar/custom-slot", response_class=HTMLResponse)
+@router.post("/my-calendar", response_class=HTMLResponse)
 async def create_custom_slot(
     request: Request,
     hospital_name: str | None = Form(None),
@@ -100,18 +100,14 @@ async def create_custom_slot(
             
     if errors:
         error_html = "<div class='mb-4 p-3 bg-red-50 text-red-700 text-sm rounded-md border border-red-200'>" + "<br>".join(errors) + "</div>"
-        
-        # We need to render the form content again, but with the errors and existing values
         return templates.TemplateResponse(
             request=request,
             name="templates/partials/add_custom_slot_drawer.html",
             context={
                 "hospital_name": hospital_name,
                 "master_slot": type('obj', (object,), {
-                    'physician': physician,
-                    'specialty': specialty,
-                    'contact_email': contact_email,
-                    'time_block': time_block
+                    'physician': physician, 'specialty': specialty,
+                    'contact_email': contact_email, 'time_block': time_block
                 }),
                 "selected_date": parsed_date,
                 "time_block_override": time_block,
@@ -120,6 +116,7 @@ async def create_custom_slot(
             }
         )
 
+    # Save to Database
     slot = BookedSlot(
         user_id=current_user.id,
         hospital_name=hospital_name,
@@ -134,12 +131,18 @@ async def create_custom_slot(
     db.add(slot)
     db.commit()
     
-    response = HTMLResponse("""
-    <div class='p-4 text-green-600 font-semibold text-center'>
-        ✅ Slot created successfully!
-    </div>
-    """)
+    query = GetResidentCalendarQuery(user=current_user)
+    handler = GetResidentCalendarHandler(db)
+    template_context = handler.execute(query)
 
+    # 2. Render the full calendar template
+    response = templates.TemplateResponse(
+        request=request, 
+        name="templates/calendar.html",
+        context=template_context
+    )
+
+    # 3. Keep the trigger so the frontend knows to close the drawer
     response.headers["HX-Trigger"] = "slotCreated"
 
     return response
