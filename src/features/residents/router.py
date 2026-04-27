@@ -1,22 +1,24 @@
 # src/features/residents/router.py
 from datetime import date as ddate
 
-from fastapi import APIRouter, Depends, Form, Query, Request
+from fastapi import APIRouter, Depends, Form, HTTPException, Query, Request
 from fastapi.responses import HTMLResponse, Response
 from fastapi.templating import Jinja2Templates
 from sqlmodel import Session
 
 from core.auth import get_current_user
 from core.database import get_session
-# Import Commands
 from features.residents.commands.create_custom_slot import (
     CreateCustomSlotCommand, CreateCustomSlotHandler)
+from features.residents.commands.delete_slot import (DeleteSlotCommand,
+                                                     DeleteSlotHandler)
 from features.residents.models import SlotStatus
-# Import Queries
 from features.residents.queries.get_calendar import (
     GetResidentCalendarHandler, GetResidentCalendarQuery)
 from features.residents.queries.get_custom_slot_form import (
     GetCustomSlotFormHandler, GetCustomSlotFormQuery)
+from features.residents.queries.get_slot_details import (GetSlotDetailsHandler,
+                                                         GetSlotDetailsQuery)
 from features.users.models import User
 
 router = APIRouter()
@@ -143,3 +145,57 @@ async def create_custom_slot(
     response.headers["HX-Trigger"] = "slotCreated"
 
     return response
+
+
+@router.delete("/my-calendar/slots/{slot_id}", response_class=HTMLResponse)
+async def delete_slot(
+    slot_id: int,
+    request: Request,
+    db: Session = Depends(get_session),
+    current_user: User | None = Depends(get_current_user)
+):
+    if not current_user:
+        return HTMLResponse("Unauthorized", status_code=401)
+        
+    # 1. Execute Delete Command
+    command = DeleteSlotCommand(slot_id=slot_id, user_id=current_user.id)
+    DeleteSlotHandler(db).execute(command)
+    
+    # 2. Re-fetch the updated calendar
+    query = GetResidentCalendarQuery(user=current_user)
+    template_context = GetResidentCalendarHandler(db).execute(query)
+
+    # 3. Return the full template (HTMX will extract just the calendar)
+    response = templates.TemplateResponse(
+        request=request, 
+        name="templates/calendar.html",
+        context=template_context
+    )
+    
+    # Optional: Trigger a toast notification specifically for deletion
+    response.headers["HX-Trigger"] = "slotDeleted"
+    return response
+
+
+@router.get("/my-calendar/slots/{slot_id}/details", response_class=HTMLResponse)
+async def view_slot_details(
+    slot_id: int,
+    request: Request,
+    db: Session = Depends(get_session),
+    current_user: User | None = Depends(get_current_user)
+):
+    if not current_user:
+        return HTMLResponse("Unauthorized", status_code=401)
+        
+    try:
+        # Dispatch Query
+        query = GetSlotDetailsQuery(slot_id=slot_id, user_id=current_user.id)
+        slot = GetSlotDetailsHandler(db).execute(query)
+    except HTTPException:
+        return HTMLResponse("<div class='p-4 text-red-500'>Slot not found or unauthorized.</div>", status_code=404)
+
+    return templates.TemplateResponse(
+        request=request,
+        name="templates/partials/view_slot_drawer.html",
+        context={"slot": slot}
+    )

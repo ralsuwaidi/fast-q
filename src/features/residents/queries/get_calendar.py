@@ -4,7 +4,6 @@ from datetime import date
 
 from sqlmodel import Session, select
 
-
 from features.users.models import User
 
 from ..models import BookedSlot
@@ -46,6 +45,7 @@ class GetResidentCalendarHandler:
             user_events[event_date_str].append({
                 "name": f"{title} ({specialty})",
                 "time": time_str,
+                "id": booked.id,
                 "status": booked.status
             })
 

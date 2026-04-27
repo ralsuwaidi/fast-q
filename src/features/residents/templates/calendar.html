@@ -40,18 +40,23 @@
             {{ day.day_str }}
           </time>
           
-          {% if day.events %}
+{% if day.events %}
           <ol class="mt-2">
             {% for event in day.events %}
             <li>
-              <a href="#" class="group flex">
+              <button type="button"
+                      hx-get="/my-calendar/slots/{{ event.id }}/details"
+                      hx-target="#view-slot-drawer-container"
+                      hx-swap="innerHTML"
+                      class="group flex w-full text-left cursor-pointer focus:outline-none">
                 <p class="flex-auto truncate font-medium text-gray-900 group-hover:text-indigo-600 dark:text-white dark:group-hover:text-indigo-400">{{ event.name }}</p>
                 <time datetime="{{ event.datetime }}" class="ml-3 hidden flex-none text-gray-500 group-hover:text-indigo-600 xl:block dark:text-gray-400 dark:group-hover:text-indigo-400">{{ event.time }}</time>
-              </a>
+              </button>
             </li>
             {% endfor %}
           </ol>
           {% endif %}
+
         </div>
         {% endfor %}
       </div>
@@ -82,7 +87,7 @@
     </div>
   </div>
 
-  {% if selected_day_events %}
+{% if selected_day_events %}
   <div class="relative px-4 py-10 sm:px-6 lg:hidden dark:after:pointer-events-none dark:after:absolute dark:after:inset-x-0 dark:after:top-0 dark:after:h-px dark:after:bg-white/10">
     <ol class="divide-y divide-gray-100 overflow-hidden rounded-lg bg-white text-sm shadow-sm outline-1 outline-black/5 dark:divide-white/10 dark:bg-gray-800/50 dark:shadow-none dark:-outline-offset-1 dark:outline-white/10">
       {% for event in selected_day_events %}
@@ -96,9 +101,14 @@
             {{ event.time }}
           </time>
         </div>
-        <a href="#" class="ml-6 flex-none self-center rounded-md bg-white px-3 py-2 font-semibold text-gray-900 opacity-0 shadow-xs ring-1 ring-gray-300 ring-inset group-hover:opacity-100 hover:ring-gray-400 focus:opacity-100 dark:bg-white/10 dark:text-white dark:shadow-none dark:ring-white/5 dark:hover:bg-white/20 dark:hover:ring-white/5">
-            Edit<span class="sr-only">, {{ event.name }}</span>
-        </a>
+        
+        <button type="button"
+                hx-get="/my-calendar/slots/{{ event.id }}/details"
+                hx-target="#view-slot-drawer-container"
+                hx-swap="innerHTML"
+                class="ml-6 flex-none self-center cursor-pointer rounded-md bg-white px-3 py-2 font-semibold text-gray-900 opacity-0 shadow-xs ring-1 ring-gray-300 ring-inset group-hover:opacity-100 hover:ring-gray-400 focus:opacity-100 dark:bg-white/10 dark:text-white dark:shadow-none dark:ring-white/5 dark:hover:bg-white/20 dark:hover:ring-white/5">
+            View<span class="sr-only">, {{ event.name }}</span>
+        </button>
       </li>
       {% endfor %}
     </ol>
@@ -108,4 +118,6 @@
 </div> 
 {% include 'templates/partials/add_custom_slot_drawer.html' %}
 
+
+<div id="view-slot-drawer-container"></div>
 {% endblock %}
