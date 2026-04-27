@@ -9,37 +9,45 @@ from sqlmodel import Session
 from core.auth import get_current_user
 from core.database import get_session
 from features.residents.commands.create_custom_slot import (
-    CreateCustomSlotCommand, CreateCustomSlotHandler)
-from features.residents.commands.delete_slot import (DeleteSlotCommand,
-                                                     DeleteSlotHandler)
+    CreateCustomSlotCommand,
+    CreateCustomSlotHandler,
+)
+from features.residents.commands.delete_slot import DeleteSlotCommand, DeleteSlotHandler
 from features.residents.models import SlotStatus
 from features.residents.queries.get_calendar import (
-    GetResidentCalendarHandler, GetResidentCalendarQuery)
+    GetResidentCalendarHandler,
+    GetResidentCalendarQuery,
+)
 from features.residents.queries.get_custom_slot_form import (
-    GetCustomSlotFormHandler, GetCustomSlotFormQuery)
-from features.residents.queries.get_slot_details import (GetSlotDetailsHandler,
-                                                         GetSlotDetailsQuery)
+    GetCustomSlotFormHandler,
+    GetCustomSlotFormQuery,
+)
+from features.residents.queries.get_slot_details import (
+    GetSlotDetailsHandler,
+    GetSlotDetailsQuery,
+)
 from features.users.models import User
 
 router = APIRouter()
 templates = Jinja2Templates(directory=["src/features/residents", "src/templates"])
 
+
 @router.get("/my-calendar", response_class=HTMLResponse)
 async def home_page(
     request: Request,
+    selected_date: ddate | None = Query(None),  # <--- ADD THIS
     db: Session = Depends(get_session),
-    current_user: User | None = Depends(get_current_user)
+    current_user: User | None = Depends(get_current_user),
 ):
     if not current_user:
         return Response(status_code=302, headers={"Location": "/login"})
 
-    query = GetResidentCalendarQuery(user=current_user)
+    # Pass the selected_date to the query
+    query = GetResidentCalendarQuery(user=current_user, selected_date=selected_date)
     template_context = GetResidentCalendarHandler(db).execute(query)
 
     return templates.TemplateResponse(
-        request=request, 
-        name="templates/calendar.html",
-        context=template_context
+        request=request, name="templates/calendar.html", context=template_context
     )
 
 
@@ -49,12 +57,12 @@ async def get_custom_slot_drawer(
     master_slot_id: int | None = Query(None),
     time_block: str | None = Query(None),
     selected_date: ddate | None = Query(None),
-    db: Session = Depends(get_session)
+    db: Session = Depends(get_session),
 ):
     # Dispatch Query
     query = GetCustomSlotFormQuery(master_slot_id=master_slot_id)
     form_data = GetCustomSlotFormHandler(db).execute(query)
-        
+
     return templates.TemplateResponse(
         request=request,
         name="templates/partials/add_custom_slot_drawer.html",
@@ -63,8 +71,8 @@ async def get_custom_slot_drawer(
             "hospital_name": form_data["hospital_name"],
             "master_slot_id": master_slot_id,
             "time_block_override": time_block,
-            "selected_date": selected_date
-        }
+            "selected_date": selected_date,
+        },
     )
 
 
@@ -80,42 +88,59 @@ async def create_custom_slot(
     status: SlotStatus = Form(SlotStatus.to_contact),
     notes: str | None = Form(None),
     db: Session = Depends(get_session),
-    current_user: User | None = Depends(get_current_user)
+    current_user: User | None = Depends(get_current_user),
 ):
     if not current_user:
-        return HTMLResponse("<span class='text-red-500 text-xs'>Please log in</span>", status_code=401)
-        
+        return HTMLResponse(
+            "<span class='text-red-500 text-xs'>Please log in</span>", status_code=401
+        )
+
     # --- 1. Router Level Validation ---
     errors = []
-    if not hospital_name: errors.append("Hospital is required.")
-    if not physician: errors.append("Physician is required.")
-    if not time_block: errors.append("Time Block is required.")
-    if not contact_email: errors.append("Contact Email is required.")
-    if not date: errors.append("Date is required.")
-    
+    if not hospital_name:
+        errors.append("Hospital is required.")
+    if not physician:
+        errors.append("Physician is required.")
+    if not time_block:
+        errors.append("Time Block is required.")
+    if not contact_email:
+        errors.append("Contact Email is required.")
+    if not date:
+        errors.append("Date is required.")
+
     parsed_date = None
     if date:
         try:
             parsed_date = ddate.fromisoformat(date)
         except ValueError:
             errors.append("Invalid date format.")
-            
+
     if errors:
-        error_html = "<div class='mb-4 p-3 bg-red-50 text-red-700 text-sm rounded-md border border-red-200'>" + "<br>".join(errors) + "</div>"
+        error_html = (
+            "<div class='mb-4 p-3 bg-red-50 text-red-700 text-sm rounded-md border border-red-200'>"
+            + "<br>".join(errors)
+            + "</div>"
+        )
         return templates.TemplateResponse(
             request=request,
             name="templates/partials/add_custom_slot_drawer.html",
             context={
                 "hospital_name": hospital_name,
-                "master_slot": type('obj', (object,), {
-                    'physician': physician, 'specialty': specialty,
-                    'contact_email': contact_email, 'time_block': time_block
-                }),
+                "master_slot": type(
+                    "obj",
+                    (object,),
+                    {
+                        "physician": physician,
+                        "specialty": specialty,
+                        "contact_email": contact_email,
+                        "time_block": time_block,
+                    },
+                ),
                 "selected_date": parsed_date,
                 "time_block_override": time_block,
                 "error_message": error_html,
-                "just_form_content": True
-            }
+                "just_form_content": True,
+            },
         )
 
     # --- 2. Dispatch Command (Write) ---
@@ -128,19 +153,17 @@ async def create_custom_slot(
         date=parsed_date,
         specialty=specialty,
         status=status,
-        notes=notes
+        notes=notes,
     )
     CreateCustomSlotHandler(db).execute(command)
-    
+
     # --- 3. Dispatch Query (Read) ---
     query = GetResidentCalendarQuery(user=current_user)
     template_context = GetResidentCalendarHandler(db).execute(query)
 
     # --- 4. Return Response ---
     response = templates.TemplateResponse(
-        request=request, 
-        name="templates/calendar.html",
-        context=template_context
+        request=request, name="templates/calendar.html", context=template_context
     )
     response.headers["HX-Trigger"] = "slotCreated"
 
@@ -152,26 +175,24 @@ async def delete_slot(
     slot_id: int,
     request: Request,
     db: Session = Depends(get_session),
-    current_user: User | None = Depends(get_current_user)
+    current_user: User | None = Depends(get_current_user),
 ):
     if not current_user:
         return HTMLResponse("Unauthorized", status_code=401)
-        
+
     # 1. Execute Delete Command
     command = DeleteSlotCommand(slot_id=slot_id, user_id=current_user.id)
     DeleteSlotHandler(db).execute(command)
-    
+
     # 2. Re-fetch the updated calendar
     query = GetResidentCalendarQuery(user=current_user)
     template_context = GetResidentCalendarHandler(db).execute(query)
 
     # 3. Return the full template (HTMX will extract just the calendar)
     response = templates.TemplateResponse(
-        request=request, 
-        name="templates/calendar.html",
-        context=template_context
+        request=request, name="templates/calendar.html", context=template_context
     )
-    
+
     # Optional: Trigger a toast notification specifically for deletion
     response.headers["HX-Trigger"] = "slotDeleted"
     return response
@@ -182,20 +203,23 @@ async def view_slot_details(
     slot_id: int,
     request: Request,
     db: Session = Depends(get_session),
-    current_user: User | None = Depends(get_current_user)
+    current_user: User | None = Depends(get_current_user),
 ):
     if not current_user:
         return HTMLResponse("Unauthorized", status_code=401)
-        
+
     try:
         # Dispatch Query
         query = GetSlotDetailsQuery(slot_id=slot_id, user_id=current_user.id)
         slot = GetSlotDetailsHandler(db).execute(query)
     except HTTPException:
-        return HTMLResponse("<div class='p-4 text-red-500'>Slot not found or unauthorized.</div>", status_code=404)
+        return HTMLResponse(
+            "<div class='p-4 text-red-500'>Slot not found or unauthorized.</div>",
+            status_code=404,
+        )
 
     return templates.TemplateResponse(
         request=request,
         name="templates/partials/view_slot_drawer.html",
-        context={"slot": slot}
+        context={"slot": slot},
     )

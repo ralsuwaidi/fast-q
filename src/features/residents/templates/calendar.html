@@ -61,9 +61,14 @@
         {% endfor %}
       </div>
 
-      <div class="isolate grid w-full grid-cols-7 grid-rows-6 gap-px lg:hidden">
+<div class="isolate grid w-full grid-cols-7 grid-rows-6 gap-px lg:hidden">
         {% for day in calendar_days %}
+        
         <button type="button" 
+                hx-get="/my-calendar?selected_date={{ day.datetime_str }}"
+                hx-target="#calendar-container"
+                hx-select="#calendar-container"
+                hx-swap="outerHTML"
                 {% if day.is_current_month %}data-is-current-month{% endif %} 
                 {% if day.is_today %}data-is-today{% endif %} 
                 {% if day.is_selected %}data-is-selected{% endif %}
@@ -87,17 +92,15 @@
     </div>
   </div>
 
-{% if selected_day_events %}
   <div class="relative px-4 py-10 sm:px-6 lg:hidden dark:after:pointer-events-none dark:after:absolute dark:after:inset-x-0 dark:after:top-0 dark:after:h-px dark:after:bg-white/10">
+    {% if selected_day_events %}
     <ol class="divide-y divide-gray-100 overflow-hidden rounded-lg bg-white text-sm shadow-sm outline-1 outline-black/5 dark:divide-white/10 dark:bg-gray-800/50 dark:shadow-none dark:-outline-offset-1 dark:outline-white/10">
       {% for event in selected_day_events %}
       <li class="group flex p-4 pr-6 focus-within:bg-gray-50 hover:bg-gray-50 dark:focus-within:bg-white/5 dark:hover:bg-white/5">
         <div class="flex-auto">
           <p class="font-semibold text-gray-900 dark:text-white">{{ event.name }}</p>
           <time datetime="{{ event.datetime }}" class="mt-2 flex items-center text-gray-700 dark:text-gray-300">
-            <svg viewBox="0 0 20 20" fill="currentColor" data-slot="icon" aria-hidden="true" class="mr-2 size-5 text-gray-400 dark:text-gray-500">
-              <path d="M10 18a8 8 0 1 0 0-16 8 8 0 0 0 0 16Zm.75-13a.75.75 0 0 0-1.5 0v5c0 .414.336.75.75.75h4a.75.75 0 0 0 0-1.5h-3.25V5Z" clip-rule="evenodd" fill-rule="evenodd" />
-            </svg>
+            <svg viewBox="0 0 20 20" fill="currentColor" class="mr-2 size-5 text-gray-400 dark:text-gray-500"><path d="M10 18a8 8 0 1 0 0-16 8 8 0 0 0 0 16Zm.75-13a.75.75 0 0 0-1.5 0v5c0 .414.336.75.75.75h4a.75.75 0 0 0 0-1.5h-3.25V5Z" clip-rule="evenodd" fill-rule="evenodd" /></svg>
             {{ event.time }}
           </time>
         </div>
@@ -107,15 +110,17 @@
                 hx-target="#view-slot-drawer-container"
                 hx-swap="innerHTML"
                 class="ml-6 flex-none self-center cursor-pointer rounded-md bg-white px-3 py-2 font-semibold text-gray-900 opacity-0 shadow-xs ring-1 ring-gray-300 ring-inset group-hover:opacity-100 hover:ring-gray-400 focus:opacity-100 dark:bg-white/10 dark:text-white dark:shadow-none dark:ring-white/5 dark:hover:bg-white/20 dark:hover:ring-white/5">
-            View<span class="sr-only">, {{ event.name }}</span>
+            View
         </button>
       </li>
       {% endfor %}
     </ol>
+    {% else %}
+    <p class="text-center text-sm text-gray-500 dark:text-gray-400">No events scheduled for this day.</p>
+    {% endif %}
   </div>
-  {% endif %}
 
-</div> 
+</div>
 {% include 'templates/partials/add_custom_slot_drawer.html' %}
 
 
