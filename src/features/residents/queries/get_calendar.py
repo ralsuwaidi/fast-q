@@ -1,7 +1,7 @@
 # src/features/residents/queries/get_calendar.py
 import calendar
 from dataclasses import dataclass
-from datetime import date, timedelta
+from datetime import date
 
 from sqlmodel import Session, select
 
@@ -66,14 +66,6 @@ class GetResidentCalendarHandler:
         month_days = cal.monthdatescalendar(view_date.year, view_date.month)
 
         flat_days = [day for week in month_days for day in week]
-
-        # Ensure exactly 6 weeks (42 days)
-        if len(month_days) < 6:
-            last_day = flat_days[-1]
-            days_to_add = (6 * 7) - len(flat_days)
-
-            for i in range(1, days_to_add + 1):
-                flat_days.append(last_day.replace(day=last_day.day) + timedelta(days=i))
 
         calendar_days = []
         for d in flat_days:

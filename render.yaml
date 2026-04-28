@@ -1,0 +1,12 @@
+services:
+  - type: web
+    name: fast-q
+    runtime: python
+    plan: free # or standard
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.13
+      - key: PYTHONPATH
+        value: src
+    buildCommand: "curl -LsSf https://astral.sh/uv/install.sh | sh && source $HOME/.cargo/env && uv sync --frozen && chmod +x ./tailwindcss && ./tailwindcss -i ./src/static/input.css -o ./src/static/output.css"
+    startCommand: "source $HOME/.cargo/env && uv run alembic upgrade head && uv run uvicorn main:app --host 0.0.0.0 --port $PORT"

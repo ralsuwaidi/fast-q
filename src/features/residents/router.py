@@ -32,6 +32,9 @@ router = APIRouter()
 templates = Jinja2Templates(directory=["src/features/residents", "src/templates"])
 
 
+# src/features/residents/router.py
+
+
 @router.get("/my-calendar", response_class=HTMLResponse)
 async def home_page(
     request: Request,
@@ -43,14 +46,23 @@ async def home_page(
     if not current_user:
         return Response(status_code=302, headers={"Location": "/login"})
 
-    # Pass BOTH parameters to your query
+    # 1. Detect if this is an HTMX request
+    is_htmx = request.headers.get("hx-request") == "true"
+
     query = GetResidentCalendarQuery(
         user=current_user, selected_date=selected_date, view_date=view_date
     )
     template_context = GetResidentCalendarHandler(db).execute(query)
 
+    # 2. Choose the template based on the request type
+    template_name = (
+        "templates/partials/calendar_grid.html"
+        if is_htmx
+        else "templates/calendar.html"
+    )
+
     return templates.TemplateResponse(
-        request=request, name="templates/calendar.html", context=template_context
+        request=request, name=template_name, context=template_context
     )
 
 
