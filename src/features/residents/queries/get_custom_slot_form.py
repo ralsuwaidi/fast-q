@@ -23,8 +23,11 @@ class GetCustomSlotFormHandler:
         
         if query.master_slot_id:
             master_slot = self.db.get(MasterSlot, query.master_slot_id)
-            if master_slot and master_slot.hospital:
-                hospital_name = master_slot.hospital.name
+            if master_slot:
+                from features.hospitals.models import Hospital
+                hospital = self.db.get(Hospital, master_slot.hospital_id)
+                if hospital:
+                    hospital_name = hospital.name
                 
         return {
             "master_slot": master_slot,

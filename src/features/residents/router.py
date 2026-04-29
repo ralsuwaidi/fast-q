@@ -74,13 +74,21 @@ async def get_custom_slot_drawer(
     selected_date: ddate | None = Query(None),
     db: Session = Depends(get_session),
 ):
+    is_htmx = request.headers.get("hx-request") == "true"
+
     # Dispatch Query
     query = GetCustomSlotFormQuery(master_slot_id=master_slot_id)
     form_data = GetCustomSlotFormHandler(db).execute(query)
 
+    template_name = (
+        "templates/partials/add_custom_slot_content.html"
+        if is_htmx
+        else "templates/add_custom_slot.html"
+    )
+
     return templates.TemplateResponse(
         request=request,
-        name="templates/partials/add_custom_slot_drawer.html",
+        name=template_name,
         context={
             "master_slot": form_data["master_slot"],
             "hospital_name": form_data["hospital_name"],
@@ -138,7 +146,7 @@ async def create_custom_slot(
         )
         return templates.TemplateResponse(
             request=request,
-            name="templates/partials/add_custom_slot_drawer.html",
+            name="templates/partials/add_custom_slot_content.html",
             context={
                 "hospital_name": hospital_name,
                 "master_slot": type(
@@ -154,7 +162,6 @@ async def create_custom_slot(
                 "selected_date": parsed_date,
                 "time_block_override": time_block,
                 "error_message": error_html,
-                "just_form_content": True,
             },
         )
 
@@ -172,17 +179,14 @@ async def create_custom_slot(
     )
     CreateCustomSlotHandler(db).execute(command)
 
-    # --- 3. Dispatch Query (Read) ---
-    query = GetResidentCalendarQuery(user=current_user)
-    template_context = GetResidentCalendarHandler(db).execute(query)
-
-    # --- 4. Return Response ---
-    response = templates.TemplateResponse(
-        request=request, name="templates/calendar.html", context=template_context
-    )
-    response.headers["HX-Trigger"] = "slotCreated"
-
-    return response
+    # --- 3. Return Response (Redirect to Calendar) ---
+    is_htmx = request.headers.get("hx-request") == "true"
+    if is_htmx:
+        response = HTMLResponse()
+        response.headers["HX-Redirect"] = "/my-calendar"
+        return response
+    
+    return Response(status_code=302, headers={"Location": "/my-calendar"})
 
 
 @router.delete("/my-calendar/slots/{slot_id}", response_class=HTMLResponse)
