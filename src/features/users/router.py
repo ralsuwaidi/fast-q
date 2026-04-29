@@ -6,9 +6,9 @@ from sqlmodel import Session
 
 from core.database import get_session
 
-from .commands import UserCommands
+from .commands.register_user import RegisterUserCommand, RegisterUserHandler
 from .models import User
-from .queries import UserQueries
+from .queries.get_user_by_email import GetUserByEmailQuery, GetUserByEmailHandler
 
 router = APIRouter()
 
@@ -37,10 +37,8 @@ async def process_login(
     db: Session = Depends(get_session)
 ):
     """Handles the HTMX form submission for logging in."""
-    queries = UserQueries(db)
-    
-    # 1. Fetch user using your existing class method
-    user = queries.get_by_email(email)
+    # 1. Fetch user
+    user = GetUserByEmailHandler(db).execute(GetUserByEmailQuery(email))
     
     # 2. Verify user exists AND password hash matches
     if not user or not pwd_context.verify(password, user.hashed_password):

@@ -6,8 +6,9 @@ from fastapi import Form
 
 from core.auth import get_current_user
 from core.database import get_session
-from features.hospitals.queries import (get_hospital_by_name,
-                                        get_hospital_schedule)
+from features.hospitals.queries.get_hospital import GetHospitalByNameQuery, GetHospitalByNameHandler
+from features.hospitals.queries.get_schedule import GetHospitalScheduleQuery, GetHospitalScheduleHandler
+from features.hospitals.commands.create_hospital import CreateHospitalCommand, CreateHospitalHandler
 from features.users.models import User
 from features.hospitals.models import Hospital
 
@@ -37,12 +38,12 @@ async def mgh_schedule(
     db: Session = Depends(get_session),
     current_user: User | None = Depends(get_current_user)
 ):
-    hospital = get_hospital_by_name(db, "Hospital A")
+    hospital = GetHospitalByNameHandler(db).execute(GetHospitalByNameQuery("Hospital A"))
 
     if not hospital:
         return render_calendar(request, {}, "MGH (Not Found)", current_user)
 
-    schedule = get_hospital_schedule(db, hospital.id)
+    schedule = GetHospitalScheduleHandler(db).execute(GetHospitalScheduleQuery(hospital.id))
     return render_calendar(request, schedule, "MGH Master Schedule", current_user)
 
 # --- MNH (Hospital B) ---
@@ -52,12 +53,12 @@ async def mnh_schedule(
     db: Session = Depends(get_session),
     current_user: User | None = Depends(get_current_user)
 ):
-    hospital = get_hospital_by_name(db, "Hospital B")
+    hospital = GetHospitalByNameHandler(db).execute(GetHospitalByNameQuery("Hospital B"))
     
     if not hospital:
         return render_calendar(request, {}, "MNH (Not Found)", current_user)
 
-    schedule = get_hospital_schedule(db, hospital.id)
+    schedule = GetHospitalScheduleHandler(db).execute(GetHospitalScheduleQuery(hospital.id))
     return render_calendar(request, schedule, "MNH Master Schedule", current_user)
 
 @router.get("/hospitals/{hospital_id}", response_class=HTMLResponse)
@@ -71,7 +72,7 @@ async def dynamic_hospital_schedule(
     if not hospital:
         return render_calendar(request, {}, "Hospital Not Found", current_user)
 
-    schedule = get_hospital_schedule(db, hospital.id)
+    schedule = GetHospitalScheduleHandler(db).execute(GetHospitalScheduleQuery(hospital.id))
     return render_calendar(request, schedule, f"{hospital.name} Master Schedule", current_user)
 
 @router.post("/hospitals/new", response_class=HTMLResponse)
@@ -81,9 +82,8 @@ async def create_hospital(
     db: Session = Depends(get_session),
     current_user: User | None = Depends(get_current_user)
 ):
-    hospital = Hospital(name=name)
-    db.add(hospital)
-    db.commit()
+    command = CreateHospitalCommand(name=name)
+    hospital = CreateHospitalHandler(db).execute(command)
     
     response = HTMLResponse()
     response.headers["HX-Redirect"] = "/dashboard"

@@ -20,6 +20,8 @@ async def home_redirect():
     """Redirects the root to the dashboard."""
     return RedirectResponse(url="/dashboard", status_code=302)
 
+from features.hospitals.queries.get_all_hospitals import GetAllHospitalsQuery, GetAllHospitalsHandler
+
 @router.get("/dashboard", response_class=HTMLResponse)
 async def dashboard_page(
     request: Request, 
@@ -27,7 +29,7 @@ async def dashboard_page(
     current_user: User | None = Depends(get_current_user)
 ):
     """Renders the dashboard with hospital cards."""
-    hospitals = db.exec(select(Hospital)).all()
+    hospitals = GetAllHospitalsHandler(db).execute(GetAllHospitalsQuery())
     
     template_name = "partials/dashboard_content.html" if request.headers.get("hx-request") else "dashboard.html"
     
