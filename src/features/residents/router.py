@@ -282,18 +282,16 @@ async def delete_slot(
     command = DeleteSlotCommand(slot_id=slot_id, user_id=current_user.id)
     DeleteSlotHandler(db).execute(command)
 
-    # 2. Re-fetch the updated calendar
-    query = GetResidentCalendarQuery(user=current_user)
-    template_context = GetResidentCalendarHandler(db).execute(query)
-
-    # 3. Return the full template (HTMX will extract just the calendar)
-    response = templates.TemplateResponse(
-        request=request, name="templates/calendar.html", context=template_context
-    )
-
-    # Optional: Trigger a toast notification specifically for deletion
-    response.headers["HX-Trigger"] = "slotDeleted"
-    return response
+    # 2. Return Response (Redirect to Calendar)
+    is_htmx = request.headers.get("hx-request") == "true"
+    if is_htmx:
+        response = HTMLResponse()
+        response.headers["HX-Redirect"] = "/my-calendar"
+        # Optional: Trigger a toast notification specifically for deletion
+        response.headers["HX-Trigger"] = "slotDeleted"
+        return response
+    
+    return Response(status_code=302, headers={"Location": "/my-calendar"})
 
 
 @router.get("/my-calendar/slots/{slot_id}/details", response_class=HTMLResponse)
