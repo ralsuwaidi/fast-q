@@ -19,11 +19,20 @@ class GetCustomSlotFormHandler:
         """Fetches necessary data to populate the custom slot form."""
         
         master_slot = None
-        hospital_name = None
+        hospital_name = ""
+        physician = ""
+        specialty = ""
+        contact_email = ""
+        time_block = ""
         
         if query.master_slot_id:
             master_slot = self.db.get(MasterSlot, query.master_slot_id)
             if master_slot:
+                physician = master_slot.physician
+                specialty = master_slot.specialty or ""
+                contact_email = master_slot.contact_email
+                time_block = master_slot.time_block
+                
                 from features.hospitals.models import Hospital
                 hospital = self.db.get(Hospital, master_slot.hospital_id)
                 if hospital:
@@ -31,5 +40,9 @@ class GetCustomSlotFormHandler:
                 
         return {
             "master_slot": master_slot,
-            "hospital_name": hospital_name
+            "hospital_name": hospital_name,
+            "physician": physician,
+            "specialty": specialty,
+            "contact_email": contact_email,
+            "time_block": time_block
         }

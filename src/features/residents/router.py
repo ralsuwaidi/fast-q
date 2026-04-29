@@ -28,8 +28,91 @@ from features.residents.queries.get_slot_details import (
 )
 from features.users.models import User
 
+from features.residents.commands.update_slot import UpdateSlotCommand, UpdateSlotHandler
+
 router = APIRouter()
 templates = Jinja2Templates(directory=["src/features/residents", "src/templates"])
+
+
+@router.get("/my-calendar/slots/{slot_id}/edit", response_class=HTMLResponse)
+async def get_edit_slot_page(
+    slot_id: int,
+    request: Request,
+    db: Session = Depends(get_session),
+    current_user: User | None = Depends(get_current_user),
+):
+    if not current_user:
+        return Response(status_code=302, headers={"Location": "/login"})
+
+    is_htmx = request.headers.get("hx-request") == "true"
+    
+    query = GetSlotDetailsQuery(slot_id=slot_id, user_id=current_user.id)
+    slot = GetSlotDetailsHandler(db).execute(query)
+
+    template_name = (
+        "templates/partials/add_custom_slot_content.html"
+        if is_htmx
+        else "templates/add_custom_slot.html"
+    )
+
+    return templates.TemplateResponse(
+        request=request,
+        name=template_name,
+        context={
+            "slot": slot,
+            "hospital_name": slot.hospital_name,
+            "physician": slot.physician,
+            "specialty": slot.specialty,
+            "contact_email": slot.contact_email,
+            "time_block_override": slot.time_block,
+            "selected_date": slot.date,
+            "status": slot.status,
+            "notes": slot.notes,
+        },
+    )
+
+
+@router.post("/my-calendar/slots/{slot_id}/edit", response_class=HTMLResponse)
+async def update_slot_route(
+    slot_id: int,
+    request: Request,
+    hospital_name: str = Form(...),
+    physician: str = Form(...),
+    time_block: str = Form(...),
+    contact_email: str = Form(...),
+    date: str = Form(...),
+    specialty: str | None = Form(None),
+    status: SlotStatus = Form(SlotStatus.to_contact),
+    notes: str | None = Form(None),
+    db: Session = Depends(get_session),
+    current_user: User | None = Depends(get_current_user),
+):
+    if not current_user:
+        return HTMLResponse("Unauthorized", status_code=401)
+
+    parsed_date = ddate.fromisoformat(date)
+    
+    command = UpdateSlotCommand(
+        slot_id=slot_id,
+        user_id=current_user.id,
+        hospital_name=hospital_name,
+        physician=physician,
+        time_block=time_block,
+        contact_email=contact_email,
+        date=parsed_date,
+        specialty=specialty,
+        status=status,
+        notes=notes,
+    )
+    UpdateSlotHandler(db).execute(command)
+
+    is_htmx = request.headers.get("hx-request") == "true"
+    if is_htmx:
+        response = HTMLResponse()
+        response.headers["HX-Redirect"] = "/my-calendar"
+        return response
+    
+    return Response(status_code=302, headers={"Location": "/my-calendar"})
 
 
 # src/features/residents/router.py
@@ -92,8 +175,11 @@ async def get_custom_slot_drawer(
         context={
             "master_slot": form_data["master_slot"],
             "hospital_name": form_data["hospital_name"],
+            "physician": form_data["physician"],
+            "specialty": form_data["specialty"],
+            "contact_email": form_data["contact_email"],
             "master_slot_id": master_slot_id,
-            "time_block_override": time_block,
+            "time_block_override": time_block or form_data["time_block"],
             "selected_date": selected_date,
         },
     )
@@ -149,16 +235,9 @@ async def create_custom_slot(
             name="templates/partials/add_custom_slot_content.html",
             context={
                 "hospital_name": hospital_name,
-                "master_slot": type(
-                    "obj",
-                    (object,),
-                    {
-                        "physician": physician,
-                        "specialty": specialty,
-                        "contact_email": contact_email,
-                        "time_block": time_block,
-                    },
-                ),
+                "physician": physician,
+                "specialty": specialty,
+                "contact_email": contact_email,
                 "selected_date": parsed_date,
                 "time_block_override": time_block,
                 "error_message": error_html,

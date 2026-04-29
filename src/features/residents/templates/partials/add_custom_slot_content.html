@@ -1,14 +1,20 @@
 <div class="max-w-3xl mx-auto py-10 px-4 sm:px-6 lg:px-8">
   <div class="mb-8">
     <h2 class="text-2xl font-bold leading-7 text-gray-900 dark:text-white sm:truncate sm:text-3xl sm:tracking-tight">
-      {% if master_slot_id %}Book Shift{% else %}Add Custom Slot{% endif %}
+      {% if slot %}Edit Slot{% elif master_slot_id %}Book Shift{% else %}Add Custom Slot{% endif %}
     </h2>
     <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
-      Fill in the details below to add this shift to your personal calendar.
+      {% if slot %}Update the details for this shift.{% else %}Fill in the details below to add this shift to your personal calendar.{% endif %}
     </p>
   </div>
 
-  <form id="custom-slot-form" action="/my-calendar" method="POST" hx-post="/my-calendar" hx-target="#main-content" hx-push-url="true" class="bg-white dark:bg-gray-800 shadow-sm ring-1 ring-gray-900/5 dark:ring-white/10 sm:rounded-xl">
+  <form id="custom-slot-form" 
+        action="{% if slot %}/my-calendar/slots/{{ slot.id }}/edit{% else %}/my-calendar{% endif %}" 
+        method="POST" 
+        hx-post="{% if slot %}/my-calendar/slots/{{ slot.id }}/edit{% else %}/my-calendar{% endif %}" 
+        hx-target="#main-content" 
+        hx-push-url="true" 
+        class="bg-white dark:bg-gray-800 shadow-sm ring-1 ring-gray-900/5 dark:ring-white/10 sm:rounded-xl">
     
     {% if error_message %}
       <div class="p-4 bg-red-50 text-red-700 text-sm rounded-t-xl border-b border-red-200">
@@ -22,28 +28,28 @@
         <div class="sm:col-span-3">
           <label for="hospital_name" class="block text-sm font-medium leading-6 text-gray-900 dark:text-white">Hospital</label>
           <div class="mt-2">
-            <input type="text" name="hospital_name" id="hospital_name" value="{{ hospital_name if hospital_name else '' }}" required class="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6 dark:bg-white/5 dark:text-white dark:ring-white/10">
+            <input type="text" name="hospital_name" id="hospital_name" value="{{ hospital_name }}" required class="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6 dark:bg-white/5 dark:text-white dark:ring-white/10">
           </div>
         </div>
 
         <div class="sm:col-span-3">
           <label for="physician" class="block text-sm font-medium leading-6 text-gray-900 dark:text-white">Physician</label>
           <div class="mt-2">
-            <input type="text" name="physician" id="physician" value="{{ master_slot.physician if master_slot else '' }}" required class="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6 dark:bg-white/5 dark:text-white dark:ring-white/10">
+            <input type="text" name="physician" id="physician" value="{{ physician }}" required class="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6 dark:bg-white/5 dark:text-white dark:ring-white/10">
           </div>
         </div>
 
         <div class="sm:col-span-3">
           <label for="specialty" class="block text-sm font-medium leading-6 text-gray-900 dark:text-white">Specialty</label>
           <div class="mt-2">
-            <input type="text" name="specialty" id="specialty" value="{{ master_slot.specialty if master_slot else '' }}" class="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6 dark:bg-white/5 dark:text-white dark:ring-white/10">
+            <input type="text" name="specialty" id="specialty" value="{{ specialty }}" class="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6 dark:bg-white/5 dark:text-white dark:ring-white/10">
           </div>
         </div>
 
         <div class="sm:col-span-3">
           <label for="contact_email" class="block text-sm font-medium leading-6 text-gray-900 dark:text-white">Contact Email</label>
           <div class="mt-2">
-            <input type="email" name="contact_email" id="contact_email" value="{{ master_slot.contact_email if master_slot else '' }}" required class="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6 dark:bg-white/5 dark:text-white dark:ring-white/10">
+            <input type="email" name="contact_email" id="contact_email" value="{{ contact_email }}" required class="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6 dark:bg-white/5 dark:text-white dark:ring-white/10">
           </div>
         </div>
 
@@ -57,7 +63,7 @@
         <div class="sm:col-span-3">
           <label for="time_block" class="block text-sm font-medium leading-6 text-gray-900 dark:text-white">Time Block</label>
           <div class="mt-2">
-            <input type="text" name="time_block" id="time_block" value="{{ time_block_override if time_block_override else (master_slot.time_block if master_slot else '') }}" required class="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6 dark:bg-white/5 dark:text-white dark:ring-white/10">
+            <input type="text" name="time_block" id="time_block" value="{{ time_block_override }}" required class="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6 dark:bg-white/5 dark:text-white dark:ring-white/10">
           </div>
         </div>
 
@@ -65,9 +71,9 @@
           <label for="status" class="block text-sm font-medium leading-6 text-gray-900 dark:text-white">Status</label>
           <div class="mt-2">
             <select id="status" name="status" class="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6 dark:bg-white/5 dark:text-white dark:ring-white/10">
-              <option value="To Contact">To Contact</option>
-              <option value="Emailed">Emailed</option>
-              <option value="Confirmed">Confirmed</option>
+              <option value="To Contact" {% if status == 'To Contact' %}selected{% endif %}>To Contact</option>
+              <option value="Emailed" {% if status == 'Emailed' %}selected{% endif %}>Emailed</option>
+              <option value="Confirmed" {% if status == 'Confirmed' %}selected{% endif %}>Confirmed</option>
             </select>
           </div>
         </div>
@@ -75,7 +81,7 @@
         <div class="col-span-full">
           <label for="notes" class="block text-sm font-medium leading-6 text-gray-900 dark:text-white">Notes</label>
           <div class="mt-2">
-            <textarea id="notes" name="notes" rows="3" class="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6 dark:bg-white/5 dark:text-white dark:ring-white/10"></textarea>
+            <textarea id="notes" name="notes" rows="3" class="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6 dark:bg-white/5 dark:text-white dark:ring-white/10">{{ notes if notes else '' }}</textarea>
           </div>
           <p class="mt-3 text-sm leading-6 text-gray-500 dark:text-gray-400">Write any personal notes regarding this shift.</p>
         </div>
@@ -84,8 +90,18 @@
     </div>
     
     <div class="flex items-center justify-end gap-x-6 border-t border-gray-900/10 dark:border-white/10 px-4 py-4 sm:px-8 bg-gray-50 dark:bg-gray-900/50 rounded-b-xl">
+      {% if slot %}
+      <button type="button" 
+              hx-delete="/my-calendar/slots/{{ slot.id }}" 
+              hx-confirm="Are you sure you want to delete this slot? This cannot be undone."
+              hx-target="#main-content"
+              hx-push-url="true"
+              class="mr-auto text-sm font-semibold leading-6 text-red-600 hover:text-red-500 cursor-pointer">
+        Delete Slot
+      </button>
+      {% endif %}
       <button type="button" onclick="history.back()" class="text-sm font-semibold leading-6 text-gray-900 dark:text-white hover:text-gray-700 dark:hover:text-gray-300 cursor-pointer">Cancel</button>
-      <button type="submit" class="rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 cursor-pointer">Save Shift</button>
+      <button type="submit" class="rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 cursor-pointer">{% if slot %}Update Shift{% else %}Save Shift{% endif %}</button>
     </div>
   </form>
 </div>

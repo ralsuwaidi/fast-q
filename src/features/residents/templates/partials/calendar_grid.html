@@ -61,9 +61,10 @@
             {% for event in day.events %}
             <li>
               <button type="button"
-                      hx-get="/my-calendar/slots/{{ event.id }}/details"
-                      hx-target="#view-slot-drawer-container"
-                      hx-swap="innerHTML"
+                      hx-get="/my-calendar/slots/{{ event.id }}/edit"
+                      hx-target="#main-content"
+                      hx-push-url="true"
+                      hx-swap="innerHTML transition:true"
                       class="group flex w-full text-left cursor-pointer focus:outline-none">
                 <p class="flex-auto truncate font-medium text-gray-900 group-hover:text-indigo-600 dark:text-white dark:group-hover:text-indigo-400">{{ event.name }}</p>
                 <time datetime="{{ event.datetime }}" class="ml-3 hidden flex-none text-gray-500 group-hover:text-indigo-600 xl:block dark:text-gray-400 dark:group-hover:text-indigo-400">{{ event.time }}</time>
@@ -124,9 +125,10 @@
         </div>
         
         <button type="button"
-                hx-get="/my-calendar/slots/{{ event.id }}/details"
-                hx-target="#view-slot-drawer-container"
-                hx-swap="innerHTML"
+                hx-get="/my-calendar/slots/{{ event.id }}/edit"
+                hx-target="#main-content"
+                hx-push-url="true"
+                hx-swap="innerHTML transition:true"
                 class="ml-6 flex-none self-center cursor-pointer rounded-md bg-white px-3 py-2 font-semibold text-gray-900 opacity-0 shadow-xs ring-1 ring-gray-300 ring-inset group-hover:opacity-100 hover:ring-gray-400 focus:opacity-100 dark:bg-white/10 dark:text-white dark:shadow-none dark:ring-white/5 dark:hover:bg-white/20 dark:hover:ring-white/5">
             View
         </button>
