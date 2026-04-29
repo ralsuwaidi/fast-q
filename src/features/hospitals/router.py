@@ -2,12 +2,14 @@ from fastapi import APIRouter, Depends, Request
 from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
 from sqlmodel import Session
+from fastapi import Form
 
 from core.auth import get_current_user
 from core.database import get_session
 from features.hospitals.queries import (get_hospital_by_name,
                                         get_hospital_schedule)
 from features.users.models import User
+from features.hospitals.models import Hospital
 
 router = APIRouter()    
 templates = Jinja2Templates(directory=["src/features/hospitals", "src/templates"])
@@ -57,3 +59,32 @@ async def mnh_schedule(
 
     schedule = get_hospital_schedule(db, hospital.id)
     return render_calendar(request, schedule, "MNH Master Schedule", current_user)
+
+@router.get("/hospitals/{hospital_id}", response_class=HTMLResponse)
+async def dynamic_hospital_schedule(
+    hospital_id: int,
+    request: Request, 
+    db: Session = Depends(get_session),
+    current_user: User | None = Depends(get_current_user)
+):
+    hospital = db.get(Hospital, hospital_id)
+    if not hospital:
+        return render_calendar(request, {}, "Hospital Not Found", current_user)
+
+    schedule = get_hospital_schedule(db, hospital.id)
+    return render_calendar(request, schedule, f"{hospital.name} Master Schedule", current_user)
+
+@router.post("/hospitals/new", response_class=HTMLResponse)
+async def create_hospital(
+    request: Request,
+    name: str = Form(...),
+    db: Session = Depends(get_session),
+    current_user: User | None = Depends(get_current_user)
+):
+    hospital = Hospital(name=name)
+    db.add(hospital)
+    db.commit()
+    
+    response = HTMLResponse()
+    response.headers["HX-Redirect"] = "/dashboard"
+    return response

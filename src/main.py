@@ -10,6 +10,7 @@ from core.logger import setup_logging
 from features.hospitals.router import router as hospitals_router
 from features.residents.router import router as residents_router
 from features.users.router import router as users_router
+from features.home.router import router as home_router
 
 setup_logging()
 
@@ -27,6 +28,7 @@ app = FastAPI(lifespan=lifespan)
 app.mount("/static", StaticFiles(directory="src/static"), name="static")
 
 # Include the vertical slices
+app.include_router(home_router)
 app.include_router(users_router)
 app.include_router(residents_router)
 app.include_router(hospitals_router)

@@ -56,7 +56,7 @@ async def home_page(
 
     # 2. Choose the template based on the request type
     template_name = (
-        "templates/partials/calendar_grid.html"
+        "templates/partials/my_calendar_content.html"
         if is_htmx
         else "templates/calendar.html"
     )
