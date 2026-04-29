@@ -94,14 +94,14 @@ def seed_data():
         default_password = pwd_context.hash("password123")
 
         admin = User(
-            email="admin@muhc.ca",
+            email="admin@example.com",
             hashed_password=default_password,
             full_name="Admin Coordinator",
             role=UserRole.admin,
             is_superuser=True,
         )
         resident_1 = User(
-            email="dr.smith@mcgill.ca",
+            email="resident@example.com",
             hashed_password=default_password,
             full_name="Dr. John Smith",
             role=UserRole.resident,
