@@ -182,7 +182,7 @@ async def get_custom_slot_drawer(
             "contact_email": form_data["contact_email"],
             "master_slot_id": master_slot_id,
             "time_block_override": time_block or form_data["time_block"],
-            "selected_date": selected_date,
+            "selected_date": selected_date or ddate.today(),
         },
     )
 
