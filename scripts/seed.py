@@ -34,6 +34,7 @@ class User(SQLModel, table=True):
 class Hospital(SQLModel, table=True):
     id: int | None = Field(default=None, primary_key=True)
     name: str = Field(unique=True, index=True)
+    short_name: str = Field(unique=True, index=True, max_length=50)
 
 
 class MasterSlot(SQLModel, table=True):
@@ -110,8 +111,8 @@ def seed_data():
         session.commit()
 
         print("🌱 Seeding Hospitals...")
-        hosp_a = Hospital(name="Hospital A (MUHC)")
-        hosp_b = Hospital(name="Hospital B (JGH)")
+        hosp_a = Hospital(name="Hospital A (MUHC)", short_name="mnh")
+        hosp_b = Hospital(name="Hospital B (JGH)", short_name="mgh")
         session.add_all([hosp_a, hosp_b])
         session.commit()
 

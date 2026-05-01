@@ -33,7 +33,7 @@ async def dashboard_page(
     
     template_name = "partials/dashboard_content.html" if request.headers.get("hx-request") else "dashboard.html"
     
-    return templates.TemplateResponse(
+    response = templates.TemplateResponse(
         request=request, 
         name=template_name,
         context={
@@ -41,4 +41,6 @@ async def dashboard_page(
             "current_user": current_user
         }
     )
+    response.headers["HX-Trigger"] = "hospitalSelected"
+    return response
 

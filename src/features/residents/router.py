@@ -144,9 +144,11 @@ async def home_page(
         else "templates/calendar.html"
     )
 
-    return templates.TemplateResponse(
+    response = templates.TemplateResponse(
         request=request, name=template_name, context=template_context
     )
+    response.headers["HX-Trigger"] = "hospitalSelected"
+    return response
 
 
 @router.get("/my-calendar/custom-slot/new", response_class=HTMLResponse)
