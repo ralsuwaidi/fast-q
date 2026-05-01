@@ -15,7 +15,18 @@
                 All registered residents and administrators on the platform.
             </p>
         </div>
-        <div class="pl-[52px] sm:pl-0">
+        <div class="pl-[52px] sm:pl-0 flex items-center gap-3">
+            <a href="/admin/users/new"
+               hx-get="/admin/users/new"
+               hx-target="#main-content"
+               hx-swap="innerHTML transition:true"
+               hx-push-url="true"
+               class="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold text-white bg-violet-600 rounded-xl shadow-sm hover:bg-violet-500 active:bg-violet-700 transition-all duration-200">
+                <svg class="size-4" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                </svg>
+                Add User
+            </a>
             <a href="/dashboard"
                hx-get="/dashboard"
                hx-target="#main-content"
@@ -25,13 +36,13 @@
                 <svg class="size-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5 3 12m0 0 7.5-7.5M3 12h18" />
                 </svg>
-                Back to Dashboard
+                Dashboard
             </a>
         </div>
     </div>
 
     <!-- Stats summary bar -->
-    <div class="mb-8 grid grid-cols-1 sm:grid-cols-2 gap-4">
+    <div class="mb-8 grid grid-cols-2 gap-4">
         <div class="flex items-center gap-4 bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-white/10 shadow-sm px-5 py-4">
             <div class="flex items-center justify-center size-10 rounded-xl bg-violet-50 dark:bg-violet-900/30 text-violet-600 dark:text-violet-400 shrink-0">
                 <svg class="size-5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
@@ -56,22 +67,57 @@
         </div>
     </div>
 
-    <!-- Users Table Card -->
-    <div class="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-white/10 shadow-sm overflow-hidden">
-        <div class="flex items-center justify-between px-6 py-5 border-b border-gray-100 dark:border-white/10">
-            <div class="flex items-center gap-3">
-                <div class="flex items-center justify-center size-9 rounded-xl bg-violet-50 dark:bg-violet-900/30 text-violet-600 dark:text-violet-400 shrink-0">
-                    <svg class="size-4.5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 6.75h12M8.25 12h12m-12 5.25h12M3.75 6.75h.007v.008H3.75V6.75Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0ZM3.75 12h.007v.008H3.75V12Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm-3.375 5.25h.007v.008H3.75v-.008Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z" />
-                    </svg>
-                </div>
-                <h3 class="text-sm font-semibold text-gray-900 dark:text-white uppercase tracking-wider">All Platform Users</h3>
+    <!-- Table header label -->
+    <div class="flex items-center justify-between mb-4">
+        <div class="flex items-center gap-3">
+            <div class="flex items-center justify-center size-9 rounded-xl bg-violet-50 dark:bg-violet-900/30 text-violet-600 dark:text-violet-400 shrink-0">
+                <svg class="size-4.5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 6.75h12M8.25 12h12m-12 5.25h12M3.75 6.75h.007v.008H3.75V6.75Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0ZM3.75 12h.007v.008H3.75V12Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm-3.375 5.25h.007v.008H3.75v-.008Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z" />
+                </svg>
             </div>
-            <span class="text-xs font-medium text-gray-400 dark:text-gray-500 bg-gray-50 dark:bg-white/5 px-2.5 py-1 rounded-lg border border-gray-100 dark:border-white/10">
-                {{ users | length }} Total
-            </span>
+            <h2 class="text-sm font-semibold text-gray-900 dark:text-white uppercase tracking-wider">All Platform Users</h2>
         </div>
+        <span class="text-xs font-medium text-gray-400 dark:text-gray-500 bg-gray-50 dark:bg-white/5 px-2.5 py-1 rounded-lg border border-gray-100 dark:border-white/10">
+            {{ users | length }} Total
+        </span>
+    </div>
 
+    <!-- Mobile: stacked user cards (visible only on xs) -->
+    <div class="sm:hidden space-y-3">
+        {% for user in users %}
+        <div class="flex items-center gap-3 py-3 border-b border-gray-100 dark:border-white/10 last:border-0">
+            <div class="size-10 rounded-full flex items-center justify-center text-sm font-bold shrink-0
+                {% if user.role == 'admin' %}
+                    bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400
+                {% else %}
+                    bg-violet-50 dark:bg-violet-900/30 text-violet-600 dark:text-violet-400
+                {% endif %}">
+                {% if user.full_name %}{{ user.full_name[:2] | upper }}{% else %}{{ user.email[:2] | upper }}{% endif %}
+            </div>
+            <div class="flex-1 min-w-0">
+                <p class="text-sm font-semibold text-gray-900 dark:text-white truncate">{{ user.full_name or '—' }}</p>
+                <p class="text-xs font-mono text-gray-500 dark:text-gray-400 truncate">{{ user.email }}</p>
+            </div>
+            <div class="flex flex-col items-end gap-1 shrink-0">
+                {% if user.role == 'admin' %}
+                    <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-indigo-50 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-400">Admin</span>
+                {% else %}
+                    <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-violet-50 text-violet-700 dark:bg-violet-900/30 dark:text-violet-400">Resident</span>
+                {% endif %}
+                {% if user.is_active %}
+                    <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-emerald-50 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400">Active</span>
+                {% else %}
+                    <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-gray-50 text-gray-600 dark:bg-white/5 dark:text-gray-400">Inactive</span>
+                {% endif %}
+            </div>
+        </div>
+        {% else %}
+        <p class="py-8 text-center text-sm font-medium text-gray-500 dark:text-gray-400 italic">No users found.</p>
+        {% endfor %}
+    </div>
+
+    <!-- Desktop: full table card (hidden on xs, shown on sm+) -->
+    <div class="hidden sm:block bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-white/10 shadow-sm overflow-hidden">
         <div class="overflow-x-auto">
             <table class="w-full text-left border-collapse">
                 <thead>
@@ -94,15 +140,9 @@
                                     {% else %}
                                         bg-violet-50 dark:bg-violet-900/30 text-violet-600 dark:text-violet-400
                                     {% endif %}">
-                                    {% if user.full_name %}
-                                        {{ user.full_name[:2] | upper }}
-                                    {% else %}
-                                        {{ user.email[:2] | upper }}
-                                    {% endif %}
+                                    {% if user.full_name %}{{ user.full_name[:2] | upper }}{% else %}{{ user.email[:2] | upper }}{% endif %}
                                 </div>
-                                <span class="text-sm font-medium text-gray-900 dark:text-white">
-                                    {{ user.full_name or '—' }}
-                                </span>
+                                <span class="text-sm font-medium text-gray-900 dark:text-white">{{ user.full_name or '—' }}</span>
                             </div>
                         </td>
                         <td class="px-6 py-4">

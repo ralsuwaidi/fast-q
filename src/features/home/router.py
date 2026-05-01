@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, Request
+from fastapi import APIRouter, Depends, Form, Request
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 from sqlmodel import Session, select
@@ -6,8 +6,9 @@ from sqlmodel import Session, select
 from core.auth import get_current_user
 from core.database import get_session
 from features.hospitals.models import Hospital
-from features.users.models import User
+from features.users.models import User, UserRole
 from features.users.queries.get_active_users import GetActiveUsersHandler, GetActiveUsersQuery
+from features.users.commands.register_user import RegisterUserCommand, RegisterUserHandler
 
 router = APIRouter()
 # Point Jinja exactly to this feature's template folder
@@ -77,3 +78,81 @@ async def admin_users_page(
             "current_user": current_user,
         }
     )
+
+
+# ==========================================
+# ADMIN: CREATE USER (GET — show form)
+# ==========================================
+@router.get("/admin/users/new", response_class=HTMLResponse)
+async def create_user_page(
+    request: Request,
+    current_user: User | None = Depends(get_current_user),
+):
+    """Renders the create-user form (admin only)."""
+    if not current_user or current_user.role != "admin":
+        return RedirectResponse(url="/dashboard", status_code=302)
+
+    template_name = "partials/create_user_content.html" if request.headers.get("hx-request") else "create_user.html"
+
+    return templates.TemplateResponse(
+        request=request,
+        name=template_name,
+        context={"current_user": current_user},
+    )
+
+
+# ==========================================
+# ADMIN: CREATE USER (POST — process form)
+# ==========================================
+@router.post("/admin/users/new", response_class=HTMLResponse)
+async def create_user(
+    request: Request,
+    db: Session = Depends(get_session),
+    current_user: User | None = Depends(get_current_user),
+    full_name: str = Form(default=""),
+    email: str = Form(...),
+    password: str = Form(...),
+    confirm_password: str = Form(...),
+    role: str = Form(default="resident"),
+):
+    """Handles the create-user form submission (admin only)."""
+    if not current_user or current_user.role != "admin":
+        return RedirectResponse(url="/dashboard", status_code=302)
+
+    template_name = "partials/create_user_content.html" if request.headers.get("hx-request") else "create_user.html"
+
+    def error(msg: str):
+        return templates.TemplateResponse(
+            request=request,
+            name=template_name,
+            context={
+                "current_user": current_user,
+                "error_message": msg,
+                "full_name": full_name,
+                "email": email,
+            },
+        )
+
+    if password != confirm_password:
+        return error("Passwords do not match.")
+
+    if len(password) < 8:
+        return error("Password must be at least 8 characters.")
+
+    user_role = UserRole.admin if role == "admin" else UserRole.resident
+
+    try:
+        RegisterUserHandler(db).execute(
+            RegisterUserCommand(
+                email=email,
+                raw_password=password,
+                full_name=full_name or None,
+                role=user_role,
+            )
+        )
+    except ValueError as exc:
+        return error(str(exc))
+
+    # Success → redirect back to the users list
+    response = RedirectResponse(url="/admin/users", status_code=303)
+    return response
