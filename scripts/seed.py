@@ -111,8 +111,8 @@ def seed_data():
         session.commit()
 
         print("🌱 Seeding Hospitals...")
-        hosp_a = Hospital(name="Hospital A (MUHC)", short_name="mnh")
-        hosp_b = Hospital(name="Hospital B (JGH)", short_name="mgh")
+        hosp_a = Hospital(name="Toronto General Hospital", short_name="UHN")
+        hosp_b = Hospital(name="Vancouver General Hospital", short_name="VGH")
         session.add_all([hosp_a, hosp_b])
         session.commit()
 
