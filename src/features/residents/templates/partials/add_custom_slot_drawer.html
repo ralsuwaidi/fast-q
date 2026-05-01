@@ -1,128 +1,94 @@
 {% if not just_form_content %}
 <dialog id="add-custom-slot-drawer" aria-labelledby="drawer-title" class="fixed inset-0 size-auto max-h-none max-w-none overflow-hidden bg-transparent backdrop:bg-transparent z-50">
   <div tabindex="0" class="absolute inset-0 pl-10 focus:outline-none sm:pl-16">
-    <div class="ml-auto block size-full max-w-md transform transition duration-500 ease-in-out data-closed:translate-x-full sm:duration-700 bg-white dark:bg-gray-900 shadow-xl">
+    <div class="ml-auto block size-full max-w-md transform transition duration-300 ease-out data-closed:translate-x-full bg-[var(--color-canvas)] border-l border-[var(--color-line)] shadow-xl">
 
       <form id="custom-slot-form"
-            action="/my-calendar"
-            method="POST"
-            hx-post="/my-calendar" 
-            hx-target="#add-custom-slot-form-content"
-            hx-swap="innerHTML"
-            class="relative flex h-full flex-col divide-y divide-gray-200 dark:divide-white/10">
-        <div class="flex min-h-0 flex-1 flex-col overflow-y-auto py-6">
-          <div class="px-4 sm:px-6">
-            <div class="flex items-start justify-between">
-              <h2 id="drawer-title" class="text-base font-semibold text-gray-900 dark:text-white">Add Custom Slot</h2>
-              <div class="ml-3 flex h-7 items-center">
-                <button type="button" command="close" commandfor="add-custom-slot-drawer" class="relative rounded-md text-gray-400 hover:text-gray-500 dark:hover:text-gray-300 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">
-                  <span class="absolute -inset-2.5"></span>
-                  <span class="sr-only">Close panel</span>
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true" class="size-6">
-                    <path d="M6 18 18 6M6 6l12 12" stroke-linecap="round" stroke-linejoin="round" />
-                  </svg>
-                </button>
-              </div>
-            </div>
-          </div>
-          
-          <div id="add-custom-slot-form-content" class="relative mt-6 flex-1 px-4 sm:px-6">
+            action="/my-calendar" method="POST"
+            hx-post="/my-calendar" hx-target="#add-custom-slot-form-content" hx-swap="innerHTML"
+            class="relative flex h-full flex-col">
+        <div class="flex items-center justify-between px-5 py-4 border-b border-[var(--color-line)]">
+          <h2 id="drawer-title" class="text-sm font-semibold text-[var(--color-ink)]">Add custom slot</h2>
+          <button type="button" command="close" commandfor="add-custom-slot-drawer" class="btn btn-icon btn-ghost -mr-2">
+            <span class="sr-only">Close panel</span>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="size-4">
+              <path d="M6 18 18 6M6 6l12 12" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </button>
+        </div>
+
+        <div id="add-custom-slot-form-content" class="flex-1 overflow-y-auto px-5 py-5">
 {% endif %}
 
-            {% if error_message %}
+          {% if error_message %}
+            <div class="mb-4 flex items-start gap-3 px-3 py-2.5 rounded-md border text-sm" style="border-color: var(--color-danger); background: var(--color-danger-soft); color: var(--color-danger);">
               {{ error_message|safe }}
-            {% endif %}
+            </div>
+          {% endif %}
 
-              <div class="space-y-6">
-                <div>
-                  <label for="hospital_name" class="block text-sm/6 font-medium text-gray-900 dark:text-white">Hospital</label>
-                  <div class="mt-2">
-                    <input type="text" name="hospital_name" id="hospital_name" value="{{ hospital_name if hospital_name else '' }}" required class="block w-full rounded-md bg-white dark:bg-white/5 px-3 py-1.5 text-base text-gray-900 dark:text-white outline-1 -outline-offset-1 outline-gray-300 dark:outline-white/10 placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6">
-                  </div>
-                </div>
+          <div class="space-y-4">
+            <div>
+              <label for="hospital_name" class="label">Hospital</label>
+              <input type="text" name="hospital_name" id="hospital_name" value="{{ hospital_name if hospital_name else '' }}" required class="input">
+            </div>
 
-                <div>
-                  <label for="physician" class="block text-sm/6 font-medium text-gray-900 dark:text-white">Physician</label>
-                  <div class="mt-2">
-                    <input type="text" name="physician" id="physician" value="{{ master_slot.physician if master_slot else '' }}" required class="block w-full rounded-md bg-white dark:bg-white/5 px-3 py-1.5 text-base text-gray-900 dark:text-white outline-1 -outline-offset-1 outline-gray-300 dark:outline-white/10 placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6">
-                  </div>
-                </div>
+            <div>
+              <label for="physician" class="label">Physician</label>
+              <input type="text" name="physician" id="physician" value="{{ master_slot.physician if master_slot else '' }}" required class="input">
+            </div>
 
-                <div>
-                  <label for="specialty" class="block text-sm/6 font-medium text-gray-900 dark:text-white">Specialty</label>
-                  <div class="mt-2">
-                    <input type="text" name="specialty" id="specialty" value="{{ master_slot.specialty if master_slot else '' }}" class="block w-full rounded-md bg-white dark:bg-white/5 px-3 py-1.5 text-base text-gray-900 dark:text-white outline-1 -outline-offset-1 outline-gray-300 dark:outline-white/10 placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6">
-                  </div>
-                </div>
+            <div>
+              <label for="specialty" class="label">Specialty</label>
+              <input type="text" name="specialty" id="specialty" value="{{ master_slot.specialty if master_slot else '' }}" class="input">
+            </div>
 
-                <div>
-                  <label for="date" class="block text-sm/6 font-medium text-gray-900 dark:text-white">Date</label>
-                  <div class="mt-2">
-                    <input type="date" name="date" id="date" value="{{ selected_date if selected_date else '' }}" required class="block w-full rounded-md bg-white dark:bg-white/5 px-3 py-1.5 text-base text-gray-900 dark:text-white outline-1 -outline-offset-1 outline-gray-300 dark:outline-white/10 placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6">
-                  </div>
-                </div>
+            <div>
+              <label for="date" class="label">Date</label>
+              <input type="date" name="date" id="date" value="{{ selected_date if selected_date else '' }}" required class="input tabular">
+            </div>
 
-                <div>
-                  <label for="time_block" class="block text-sm/6 font-medium text-gray-900 dark:text-white">Time Block</label>
-                  <div class="mt-2 grid grid-cols-1">
-                    {% set current_time_block = time_block_override if time_block_override else (master_slot.time_block if master_slot else '') %}
-                    <select id="time_block" name="time_block" class="col-start-1 row-start-1 w-full appearance-none rounded-md bg-white dark:bg-white/5 py-1.5 pr-8 pl-3 text-base text-gray-900 dark:text-white outline-1 -outline-offset-1 outline-gray-300 dark:outline-white/10 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6">
-                      <option value="AM" {% if current_time_block == 'AM' %}selected{% endif %}>AM</option>
-                      <option value="PM" {% if current_time_block == 'PM' %}selected{% endif %}>PM</option>
-                      <option value="AM/PM" {% if current_time_block == 'AM/PM' %}selected{% endif %}>AM/PM</option>
-                    </select>
-                    <svg class="pointer-events-none col-start-1 row-start-1 mr-2 size-5 self-center justify-self-end text-gray-500 sm:size-4" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
-                      <path fill-rule="evenodd" d="M4.22 6.22a.75.75 0 0 1 1.06 0L8 8.94l2.72-2.72a.75.75 0 1 1 1.06 1.06l-3.25 3.25a.75.75 0 0 1-1.06 0L4.22 7.28a.75.75 0 0 1 0-1.06Z" clip-rule="evenodd" />
-                    </svg>
-                  </div>
-                </div>
+            <div>
+              <label for="time_block" class="label">Time block</label>
+              {% set current_time_block = time_block_override if time_block_override else (master_slot.time_block if master_slot else '') %}
+              <select id="time_block" name="time_block" class="input">
+                <option value="AM" {% if current_time_block == 'AM' %}selected{% endif %}>AM</option>
+                <option value="PM" {% if current_time_block == 'PM' %}selected{% endif %}>PM</option>
+                <option value="AM/PM" {% if current_time_block == 'AM/PM' %}selected{% endif %}>AM/PM</option>
+              </select>
+            </div>
 
-                <div>
-                  <label for="contact_email" class="block text-sm/6 font-medium text-gray-900 dark:text-white">Contact Email</label>
-                  <div class="mt-2">
-                    <input type="email" name="contact_email" id="contact_email" value="{{ master_slot.contact_email if master_slot else '' }}" required class="block w-full rounded-md bg-white dark:bg-white/5 px-3 py-1.5 text-base text-gray-900 dark:text-white outline-1 -outline-offset-1 outline-gray-300 dark:outline-white/10 placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6">
-                  </div>
-                </div>
+            <div>
+              <label for="contact_email" class="label">Contact email</label>
+              <input type="email" name="contact_email" id="contact_email" value="{{ master_slot.contact_email if master_slot else '' }}" required class="input">
+            </div>
 
-                <div>
-                  <label for="status" class="block text-sm/6 font-medium text-gray-900 dark:text-white">Status</label>
-                  <div class="mt-2 grid grid-cols-1">
-                    <select id="status" name="status" class="col-start-1 row-start-1 w-full appearance-none rounded-md bg-white dark:bg-white/5 py-1.5 pr-8 pl-3 text-base text-gray-900 dark:text-white outline-1 -outline-offset-1 outline-gray-300 dark:outline-white/10 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6">
-                      <option value="To Contact">To Contact</option>
-                      <option value="Emailed">Emailed</option>
-                      <option value="Confirmed">Confirmed</option>
-                    </select>
-                    <svg class="pointer-events-none col-start-1 row-start-1 mr-2 size-5 self-center justify-self-end text-gray-500 sm:size-4" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
-                      <path fill-rule="evenodd" d="M4.22 6.22a.75.75 0 0 1 1.06 0L8 8.94l2.72-2.72a.75.75 0 1 1 1.06 1.06l-3.25 3.25a.75.75 0 0 1-1.06 0L4.22 7.28a.75.75 0 0 1 0-1.06Z" clip-rule="evenodd" />
-                    </svg>
-                  </div>
-                </div>
+            <div>
+              <label for="status" class="label">Status</label>
+              <select id="status" name="status" class="input">
+                <option value="To Contact">To Contact</option>
+                <option value="Emailed">Emailed</option>
+                <option value="Confirmed">Confirmed</option>
+              </select>
+            </div>
 
-                <div>
-                  <label for="notes" class="block text-sm/6 font-medium text-gray-900 dark:text-white">Notes</label>
-                  <div class="mt-2">
-                    <textarea id="notes" name="notes" rows="3" class="block w-full rounded-md bg-white dark:bg-white/5 px-3 py-1.5 text-base text-gray-900 dark:text-white outline-1 -outline-offset-1 outline-gray-300 dark:outline-white/10 placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"></textarea>
-                  </div>
-                </div>
-              </div>
+            <div>
+              <label for="notes" class="label">Notes</label>
+              <textarea id="notes" name="notes" rows="3" class="input"></textarea>
+            </div>
+          </div>
 
 {% if not just_form_content %}
-          </div>
         </div>
-        
-        <div class="flex shrink-0 justify-end px-4 py-4 dark:bg-gray-900">
-          <button type="button" command="close" commandfor="add-custom-slot-drawer" class="rounded-md bg-white dark:bg-white/10 px-3 py-2 text-sm font-semibold text-gray-900 dark:text-white shadow-xs inset-ring inset-ring-gray-300 dark:inset-ring-white/10 hover:bg-gray-50 dark:hover:bg-white/20">
-            Cancel
-          </button>
-          
-          <button type="submit" class="ml-4 inline-flex justify-center rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-xs hover:bg-indigo-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">
-            Save
-          </button>
-        </div>        
+
+        <div class="flex shrink-0 justify-end gap-2 px-5 py-3 border-t border-[var(--color-line)]">
+          <button type="button" command="close" commandfor="add-custom-slot-drawer" class="btn btn-secondary">Cancel</button>
+          <button type="submit" class="btn btn-primary">Save</button>
+        </div>
       </form>
     </div>
   </div>
 </dialog>
+
 <script>
 document.body.addEventListener("slotCreated", () => {
   const drawer = document.getElementById("add-custom-slot-drawer");
@@ -137,8 +103,10 @@ document.body.addEventListener("slotCreated", () => {
   });
 
   const toast = document.createElement("div");
-  toast.className = "fixed bottom-4 right-4 bg-green-600 text-white px-4 py-2 rounded shadow-lg z-50 transition-opacity duration-500";
-  toast.innerText = "Slot created successfully";
+  toast.className = "fixed bottom-4 right-4 px-3 py-2 rounded-md shadow-lg z-50 text-sm font-medium transition-opacity duration-500";
+  toast.style.background = "var(--color-success)";
+  toast.style.color = "white";
+  toast.innerText = "Slot created";
   document.body.appendChild(toast);
 
   setTimeout(() => {

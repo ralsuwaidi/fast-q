@@ -1,189 +1,133 @@
-<div class="max-w-7xl mx-auto px-2 sm:px-6 lg:px-8 py-6 sm:py-10">
+<div>
+  <header class="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3 mb-8">
+    <div>
+      <h1 class="text-xl font-semibold tracking-tight text-[var(--color-ink)]">Edit {{ hospital.name }}</h1>
+      <p class="mt-1 text-sm" style="color: var(--color-muted);">Manage shifts, assign physicians, and update contact details.</p>
+    </div>
+    <a href="/hospitals/{{ hospital.short_name }}"
+       hx-get="/hospitals/{{ hospital.short_name }}"
+       hx-target="#main-content" hx-swap="innerHTML transition:true" hx-push-url="true"
+       class="btn btn-secondary self-start sm:self-auto">
+      <svg class="size-3.5" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5 3 12m0 0 7.5-7.5M3 12h18"/>
+      </svg>
+      Back to schedule
+    </a>
+  </header>
 
-    <!-- Page Header -->
-    <div class="mb-8 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+  <div class="space-y-6">
+
+    <!-- Add new master slot -->
+    <div class="card overflow-hidden">
+      <div class="px-4 py-3 border-b border-[var(--color-line)]">
+        <h3 class="text-sm font-medium text-[var(--color-ink)]">Add new master slot</h3>
+      </div>
+
+      <form hx-post="/hospitals/{{ hospital.short_name }}/slots/new"
+            hx-target="#main-content" hx-swap="innerHTML transition:true"
+            class="p-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-4 gap-y-3">
+
         <div>
-            <div class="flex items-center gap-3 mb-2">
-                <div class="flex items-center justify-center size-10 rounded-xl bg-indigo-600 text-white shadow-md">
-                    <svg class="size-5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10" />
-                    </svg>
-                </div>
-                <h1 class="text-2xl font-bold text-gray-900 dark:text-white tracking-tight">Edit {{ hospital.name }} Schedule</h1>
-            </div>
-            <p class="text-sm text-gray-500 dark:text-gray-400 pl-[52px]">
-                Manage shifts, assign physicians, and update contact details for this facility.
-            </p>
+          <label class="label">Day of week</label>
+          <select name="day_of_week" class="input" required>
+            <option value="Monday">Monday</option>
+            <option value="Tuesday">Tuesday</option>
+            <option value="Wednesday">Wednesday</option>
+            <option value="Thursday">Thursday</option>
+            <option value="Friday">Friday</option>
+            <option value="Saturday">Saturday</option>
+            <option value="Sunday">Sunday</option>
+          </select>
         </div>
-        <div class="pl-[52px] sm:pl-0">
-            <a href="/hospitals/{{ hospital.short_name }}"
-               hx-get="/hospitals/{{ hospital.short_name }}"
-               hx-target="#main-content"
-               hx-swap="innerHTML transition:true"
-               hx-push-url="true"
-               class="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-800 border border-gray-200 dark:border-white/10 rounded-xl shadow-sm hover:bg-gray-50 dark:hover:bg-white/5 transition-all duration-200">
-                <svg class="size-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5 3 12m0 0 7.5-7.5M3 12h18" />
-                </svg>
-                Back to Schedule
-            </a>
+
+        <div>
+          <label class="label">Specialty</label>
+          <input type="text" name="specialty" placeholder="e.g. Epilepsy" class="input" required>
         </div>
+
+        <div>
+          <label class="label">Physician</label>
+          <input type="text" name="physician" placeholder="Dr. Smith" class="input" required>
+        </div>
+
+        <div>
+          <label class="label">Time block</label>
+          <select name="time_block" class="input" required>
+            <option value="AM">AM</option>
+            <option value="PM">PM</option>
+            <option value="AM/PM">AM/PM</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="label">Contact email</label>
+          <input type="email" name="contact_email" placeholder="admin@hospital.org" class="input" required>
+        </div>
+
+        <div class="flex items-end">
+          <button type="submit" class="btn btn-primary w-full">
+            <svg class="size-3.5" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/>
+            </svg>
+            Add slot
+          </button>
+        </div>
+      </form>
     </div>
 
-    <div class="space-y-8">
-        
-        <!-- Add New Slot Form Card -->
-        <div class="sm:bg-white sm:dark:bg-gray-800 sm:rounded-2xl sm:border sm:border-gray-100 sm:dark:border-white/10 sm:shadow-sm sm:overflow-hidden">
-            <div class="flex items-center gap-3 px-3 py-4 sm:py-5 border-b border-gray-100 dark:border-white/10 bg-gray-50/50 dark:bg-white/5">
-                <div class="flex items-center justify-center size-9 rounded-xl bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 shrink-0">
-                    <svg class="size-4.5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
-                    </svg>
-                </div>
-                <h3 class="text-sm font-semibold text-gray-900 dark:text-white uppercase tracking-wider">Add New Master Slot</h3>
-            </div>
+    <!-- Current master slots -->
+    <div class="card overflow-hidden">
+      <div class="flex items-center justify-between px-4 py-3 border-b border-[var(--color-line)]">
+        <h3 class="text-sm font-medium text-[var(--color-ink)]">Current master slots</h3>
+        <span class="text-xs tabular" style="color: var(--color-subtle);">{{ schedule | length }} total</span>
+      </div>
 
-            <div class="p-3  sm:py-6">
-                <form hx-post="/hospitals/{{ hospital.short_name }}/slots/new" 
-                      hx-target="#main-content" 
-                      hx-swap="innerHTML transition:true"
-                      class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  
-                    <div class="space-y-1.5">
-                        <label class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider ml-1">Day of Week</label>
-                        <select name="day_of_week" class="block w-full rounded-xl border-0 py-2.5 px-3.5 text-sm text-gray-900 dark:text-white dark:bg-white/5 shadow-sm ring-1 ring-inset ring-gray-200 dark:ring-white/10 focus:ring-2 focus:ring-inset focus:ring-indigo-500 transition appearance-none" required>
-                            <option value="Monday">Monday</option>
-                            <option value="Tuesday">Tuesday</option>
-                            <option value="Wednesday">Wednesday</option>
-                            <option value="Thursday">Thursday</option>
-                            <option value="Friday">Friday</option>
-                            <option value="Saturday">Saturday</option>
-                            <option value="Sunday">Sunday</option>
-                        </select>
-                    </div>
+      <div class="overflow-x-auto">
+        <table class="w-full text-left">
+          <thead>
+            <tr class="border-b border-[var(--color-line)]">
+              <th class="px-4 py-2.5 text-[11px] font-medium uppercase tracking-[0.08em]" style="color: var(--color-subtle);">Day</th>
+              <th class="px-4 py-2.5 text-[11px] font-medium uppercase tracking-[0.08em]" style="color: var(--color-subtle);">Specialty</th>
+              <th class="px-4 py-2.5 text-[11px] font-medium uppercase tracking-[0.08em]" style="color: var(--color-subtle);">Physician</th>
+              <th class="px-4 py-2.5 text-[11px] font-medium uppercase tracking-[0.08em]" style="color: var(--color-subtle);">Time</th>
+              <th class="px-4 py-2.5 text-[11px] font-medium uppercase tracking-[0.08em]" style="color: var(--color-subtle);">Email</th>
+              <th class="px-4 py-2.5 text-right text-[11px] font-medium uppercase tracking-[0.08em]" style="color: var(--color-subtle);"></th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for slot in schedule %}
+            <tr id="slot-{{ slot.id }}" class="border-t border-[var(--color-line)] transition-colors hover:bg-[var(--color-surface-hover)]">
+              <td class="px-4 py-3 text-sm font-medium text-[var(--color-ink)]">{{ slot.day_of_week }}</td>
+              <td class="px-4 py-3 text-sm" style="color: var(--color-muted);">{{ slot.specialty }}</td>
+              <td class="px-4 py-3 text-sm font-medium text-[var(--color-ink)]">{{ slot.physician }}</td>
+              <td class="px-4 py-3">
+                <span class="badge {% if slot.time_block == 'AM/PM' %}badge-accent{% endif %}">{{ slot.time_block }}</span>
+              </td>
+              <td class="px-4 py-3 text-xs font-mono" style="color: var(--color-muted);">{{ slot.contact_email }}</td>
+              <td class="px-4 py-3 text-right">
+                <button hx-delete="/hospitals/{{ hospital.short_name }}/slots/{{ slot.id }}"
+                        hx-confirm="Delete this slot?"
+                        hx-target="#main-content" hx-swap="innerHTML transition:true"
+                        class="btn btn-sm btn-ghost hover:text-[var(--color-danger)]">
+                  <svg class="size-3.5" fill="none" viewBox="0 0 24 24" stroke-width="1.75" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="m14.74 9-.34 12m-4.72 0-.34-12M4.5 6.375h15"/>
+                  </svg>
+                  Delete
+                </button>
+              </td>
+            </tr>
+            {% endfor %}
 
-                    <div class="space-y-1.5">
-                        <label class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider ml-1">Specialty</label>
-                        <input type="text" name="specialty" placeholder="e.g. Epilepsy" 
-                               class="block w-full rounded-xl border-0 py-2.5 px-3.5 text-sm text-gray-900 dark:text-white dark:bg-white/5 shadow-sm ring-1 ring-inset ring-gray-200 dark:ring-white/10 placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:ring-2 focus:ring-inset focus:ring-indigo-500 transition" required>
-                    </div>
-
-                    <div class="space-y-1.5">
-                        <label class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider ml-1">Physician</label>
-                        <input type="text" name="physician" placeholder="e.g. Dr. Smith" 
-                               class="block w-full rounded-xl border-0 py-2.5 px-3.5 text-sm text-gray-900 dark:text-white dark:bg-white/5 shadow-sm ring-1 ring-inset ring-gray-200 dark:ring-white/10 placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:ring-2 focus:ring-inset focus:ring-indigo-500 transition" required>
-                    </div>
-
-                    <div class="space-y-1.5">
-                        <label class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider ml-1">Time Block</label>
-                        <select name="time_block" class="block w-full rounded-xl border-0 py-2.5 px-3.5 text-sm text-gray-900 dark:text-white dark:bg-white/5 shadow-sm ring-1 ring-inset ring-gray-200 dark:ring-white/10 focus:ring-2 focus:ring-inset focus:ring-indigo-500 transition appearance-none" required>
-                            <option value="AM">AM</option>
-                            <option value="PM">PM</option>
-                            <option value="AM/PM">AM/PM</option>
-                        </select>
-                    </div>
-
-                    <div class="space-y-1.5">
-                        <label class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider ml-1">Contact Email</label>
-                        <input type="email" name="contact_email" placeholder="e.g. admin@muhc.ca" 
-                               class="block w-full rounded-xl border-0 py-2.5 px-3.5 text-sm text-gray-900 dark:text-white dark:bg-white/5 shadow-sm ring-1 ring-inset ring-gray-200 dark:ring-white/10 placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:ring-2 focus:ring-inset focus:ring-indigo-500 transition" required>
-                    </div>
-
-                    <div class="flex items-end">
-                        <button type="submit" class="inline-flex items-center justify-center gap-2 w-full rounded-xl bg-indigo-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 active:bg-indigo-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 transition-all duration-150">
-                            <svg class="size-4" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
-                            </svg>
-                            Add Slot
-                        </button>
-                    </div>
-                </form>
-            </div>
-        </div>
-
-        <!-- Current Slots Table Card -->
-        <div class="sm:bg-white sm:dark:bg-gray-800 sm:rounded-2xl sm:border sm:border-gray-100 sm:dark:border-white/10 sm:shadow-sm sm:overflow-hidden">
-            <div class="flex items-center justify-between px-3 py-4 sm:py-5 border-b border-gray-100 dark:border-white/10">
-                <div class="flex items-center gap-3">
-                    <div class="flex items-center justify-center size-9 rounded-xl bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 shrink-0">
-                        <svg class="size-4.5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 6.75h12M8.25 12h12m-12 5.25h12M3.75 6.75h.007v.008H3.75V6.75Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0ZM3.75 12h.007v.008H3.75V12Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm-3.375 5.25h.007v.008H3.75v-.008Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z" />
-                        </svg>
-                    </div>
-                    <h3 class="text-sm font-semibold text-gray-900 dark:text-white uppercase tracking-wider">Current Master Slots</h3>
-                </div>
-                <span class="text-xs font-medium text-gray-400 dark:text-gray-500 bg-gray-50 dark:bg-white/5 px-2.5 py-1 rounded-lg border border-gray-100 dark:border-white/10">
-                    {{ schedule | length }} Total
-                </span>
-            </div>
-
-            <div class="overflow-x-auto">
-                <table class="w-full text-left border-collapse">
-                    <thead>
-                        <tr class="bg-gray-50/50 dark:bg-white/5">
-                            <th class="px-6 py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Day</th>
-                            <th class="px-6 py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Specialty</th>
-                            <th class="px-6 py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Physician</th>
-                            <th class="px-6 py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Time</th>
-                            <th class="px-6 py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Email</th>
-                            <th class="px-6 py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider text-right">Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody class="divide-y divide-gray-100 dark:divide-white/5">
-                        {% for slot in schedule %}
-                        <tr id="slot-{{ slot.id }}" class="group hover:bg-gray-50/50 dark:hover:bg-white/[0.02] transition-colors duration-150">
-                            <td class="px-6 py-4">
-                                <span class="text-sm font-semibold text-gray-900 dark:text-white">{{ slot.day_of_week }}</span>
-                            </td>
-                            <td class="px-6 py-4">
-                                <span class="text-sm text-gray-600 dark:text-gray-300">{{ slot.specialty }}</span>
-                            </td>
-                            <td class="px-6 py-4">
-                                <div class="flex items-center gap-2">
-                                    <span class="text-sm font-medium text-gray-900 dark:text-white">{{ slot.physician }}</span>
-                                </div>
-                            </td>
-                            <td class="px-6 py-4">
-                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {% if slot.time_block == 'AM' %}bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400{% elif slot.time_block == 'PM' %}bg-amber-50 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400{% else %}bg-purple-50 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400{% endif %}">
-                                    {{ slot.time_block }}
-                                </span>
-                            </td>
-                            <td class="px-6 py-4">
-                                <span class="text-xs font-mono text-gray-500 dark:text-gray-400">{{ slot.contact_email }}</span>
-                            </td>
-                            <td class="px-6 py-4 text-right">
-                                <button hx-delete="/hospitals/{{ hospital.short_name }}/slots/{{ slot.id }}"
-                                        hx-confirm="Are you sure you want to delete this slot?"
-                                        hx-target="#main-content"
-                                        hx-swap="innerHTML transition:true"
-                                        class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors duration-150">
-                                    <svg class="size-3.5" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="m14.74 9-.34 12m-4.72 0-.34-12M4.5 6.375h15m-15 0A2.25 2.25 0 0 1 6.75 4.5h10.5a2.25 2.25 0 0 1 2.25 2.25m-15 0V18.75A2.25 2.25 0 0 0 6.75 21h10.5a2.25 2.25 0 0 0 2.25-2.25V6.375m-15 0V18.75" />
-                                    </svg>
-                                    Delete
-                                </button>
-                            </td>
-                        </tr>
-                        {% endfor %}
-                        
-                        {% if not schedule %}
-                        <tr>
-                            <td colspan="6" class="px-6 py-12 text-center">
-                                <div class="flex flex-col items-center justify-center">
-                                    <div class="size-12 rounded-xl bg-gray-50 dark:bg-white/5 text-gray-300 dark:text-gray-600 flex items-center justify-center mb-3">
-                                        <svg class="size-6" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-                                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m9-.75a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 3.75h.008v.008H12v-.008Z" />
-                                        </svg>
-                                    </div>
-                                    <p class="text-sm font-medium text-gray-500 dark:text-gray-400 italic">No slots defined yet.</p>
-                                </div>
-                            </td>
-                        </tr>
-                        {% endif %}
-                    </tbody>
-                </table>
-            </div>
-        </div>
-
+            {% if not schedule %}
+            <tr>
+              <td colspan="6" class="px-4 py-12 text-center">
+                <p class="text-sm" style="color: var(--color-muted);">No slots defined yet.</p>
+              </td>
+            </tr>
+            {% endif %}
+          </tbody>
+        </table>
+      </div>
     </div>
+  </div>
 </div>

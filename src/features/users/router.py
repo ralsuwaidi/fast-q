@@ -6,6 +6,7 @@ from sqlmodel import Session
 
 from core.database import get_session
 
+from .commands.register_user import RegisterUserCommand, RegisterUserHandler
 from .queries.get_user_by_email import GetUserByEmailHandler, GetUserByEmailQuery
 
 router = APIRouter()
@@ -60,6 +61,48 @@ async def process_login(
     )
     res.set_cookie(key="user_session", value=str(user.id), httponly=True)
 
+    return res
+
+
+# ==========================================
+# REGISTER
+# ==========================================
+@router.get("/register", response_class=HTMLResponse)
+async def register_page(request: Request):
+    """Serves the registration page UI."""
+    return templates.TemplateResponse(request=request, name="register.html")
+
+
+@router.post("/register", response_class=HTMLResponse)
+async def process_register(
+    full_name: str = Form(""),
+    email: str = Form(...),
+    password: str = Form(...),
+    db: Session = Depends(get_session),
+):
+    """Handles the HTMX form submission for new account creation."""
+    if len(password) < 8:
+        return HTMLResponse(
+            content='<div class="animate-shake">Password must be at least 8 characters.</div>',
+            status_code=200,
+        )
+
+    try:
+        user = RegisterUserHandler(db).execute(
+            RegisterUserCommand(
+                email=email.strip().lower(),
+                raw_password=password,
+                full_name=full_name.strip() or None,
+            )
+        )
+    except ValueError as exc:
+        return HTMLResponse(
+            content=f'<div class="animate-shake">{exc}</div>',
+            status_code=200,
+        )
+
+    res = Response(status_code=200, headers={"HX-Redirect": "/"})
+    res.set_cookie(key="user_session", value=str(user.id), httponly=True)
     return res
 
 

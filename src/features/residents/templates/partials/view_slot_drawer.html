@@ -1,75 +1,62 @@
 <dialog id="view-slot-drawer" open class="fixed inset-0 size-auto max-h-none max-w-none overflow-hidden bg-transparent backdrop:bg-transparent z-50">
-  <div class="fixed inset-0 bg-gray-500/75 dark:bg-gray-900/80 transition-opacity" aria-hidden="true"></div>
+  <div class="fixed inset-0 bg-black/40 transition-opacity" aria-hidden="true"></div>
 
   <div tabindex="0" class="absolute inset-0 pl-10 focus:outline-none sm:pl-16">
-    <div class="ml-auto block size-full max-w-md transform bg-white dark:bg-gray-900 shadow-xl">
-      
-      <div class="flex h-full flex-col divide-y divide-gray-200 dark:divide-white/10">
-        <div class="px-4 py-6 sm:px-6">
-          <div class="flex items-start justify-between">
-            <h2 class="text-base font-semibold text-gray-900 dark:text-white">Slot Details</h2>
-            <div class="ml-3 flex h-7 items-center">
-              <button type="button" onclick="closeViewDrawer()" class="relative rounded-md text-gray-400 hover:text-gray-500 dark:hover:text-gray-300 focus-visible:outline-2 focus-visible:outline-indigo-600">
-                <span class="sr-only">Close panel</span>
-                <svg class="size-6" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
-                </svg>
-              </button>
-            </div>
-          </div>
+    <div class="ml-auto block size-full max-w-md transform bg-[var(--color-canvas)] border-l border-[var(--color-line)] shadow-xl">
+
+      <div class="flex h-full flex-col">
+        <div class="px-5 py-4 border-b border-[var(--color-line)] flex items-center justify-between">
+          <h2 class="text-sm font-semibold text-[var(--color-ink)]">Slot details</h2>
+          <button type="button" onclick="closeViewDrawer()" class="btn btn-icon btn-ghost -mr-2">
+            <span class="sr-only">Close panel</span>
+            <svg class="size-4" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12"/>
+            </svg>
+          </button>
         </div>
 
-        <div class="flex-1 overflow-y-auto px-4 py-6 sm:px-6">
-          <dl class="space-y-6">
+        <div class="flex-1 overflow-y-auto px-5 py-5">
+          <dl class="space-y-5">
             <div>
-              <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Physician</dt>
-              <dd class="mt-1 text-sm text-gray-900 dark:text-white">{{ slot.physician }}</dd>
+              <dt class="section-title">Physician</dt>
+              <dd class="mt-1 text-sm text-[var(--color-ink)]">{{ slot.physician }}</dd>
             </div>
             <div>
-              <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Hospital</dt>
-              <dd class="mt-1 text-sm text-gray-900 dark:text-white">{{ slot.hospital_name }}</dd>
+              <dt class="section-title">Hospital</dt>
+              <dd class="mt-1 text-sm text-[var(--color-ink)]">{{ slot.hospital_name }}</dd>
             </div>
             <div>
-              <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Date & Time</dt>
-              <dd class="mt-1 text-sm text-gray-900 dark:text-white">{{ slot.date }} | {{ slot.time_block }}</dd>
+              <dt class="section-title">Date &amp; time</dt>
+              <dd class="mt-1 text-sm font-mono tabular text-[var(--color-ink)]">{{ slot.date }} &middot; {{ slot.time_block }}</dd>
             </div>
             <div>
-              <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Status</dt>
-              <dd class="mt-1 text-sm text-gray-900 dark:text-white">
-                <span class="inline-flex items-center rounded-md bg-blue-50 px-2 py-1 text-xs font-medium text-blue-700 ring-1 ring-blue-700/10 ring-inset dark:bg-blue-400/10 dark:text-blue-400 dark:ring-blue-400/30">
-                  {{ slot.status }}
-                </span>
+              <dt class="section-title">Status</dt>
+              <dd class="mt-1.5">
+                <span class="badge badge-accent">{{ slot.status }}</span>
               </dd>
             </div>
             {% if slot.notes %}
             <div>
-              <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Notes</dt>
+              <dt class="section-title">Notes</dt>
               <dd class="mt-2">
-                <div class="rounded-xl bg-gray-50 dark:bg-white/5 border border-gray-100 dark:border-white/10 px-4 py-3 text-sm text-gray-800 dark:text-gray-200 whitespace-pre-wrap leading-relaxed">{{ slot.notes }}</div>
+                <div class="surface rounded-md px-3 py-2.5 text-sm whitespace-pre-wrap leading-relaxed" style="color: var(--color-muted);">{{ slot.notes }}</div>
               </dd>
             </div>
             {% endif %}
           </dl>
         </div>
 
-        <div class="flex shrink-0 justify-between px-4 py-4 dark:bg-gray-900">
-          
-          <button type="button" 
-                  hx-delete="/my-calendar/slots/{{ slot.id }}" 
-                  hx-confirm="Are you sure you want to delete this slot? This cannot be undone."
-                  hx-target="#calendar-container"
-                  hx-select="#calendar-container"
-                  hx-swap="outerHTML"
-                  class="rounded-md bg-red-50 px-3 py-2 text-sm font-semibold text-red-600 shadow-xs ring-1 ring-inset ring-red-300 hover:bg-red-100 dark:bg-red-500/10 dark:text-red-400 dark:ring-red-500/20 dark:hover:bg-red-500/20">
-            Delete Slot
+        <div class="flex shrink-0 justify-between gap-2 px-5 py-3 border-t border-[var(--color-line)]">
+          <button type="button"
+                  hx-delete="/my-calendar/slots/{{ slot.id }}"
+                  hx-confirm="Delete this slot? This cannot be undone."
+                  hx-target="#calendar-container" hx-select="#calendar-container" hx-swap="outerHTML"
+                  class="btn btn-danger">
+            Delete slot
           </button>
-
-          <button type="button" onclick="closeViewDrawer()" class="rounded-md bg-white dark:bg-white/10 px-3 py-2 text-sm font-semibold text-gray-900 dark:text-white shadow-xs ring-1 ring-inset ring-gray-300 dark:ring-white/10 hover:bg-gray-50 dark:hover:bg-white/20">
-            Close
-          </button>
+          <button type="button" onclick="closeViewDrawer()" class="btn btn-secondary">Close</button>
         </div>
       </div>
-      
     </div>
   </div>
 </dialog>
@@ -77,13 +64,7 @@
 <script>
   function closeViewDrawer() {
     const container = document.getElementById('view-slot-drawer-container');
-    if (container) {
-      container.innerHTML = ''; // Clears the drawer out of the DOM
-    }
+    if (container) container.innerHTML = '';
   }
-
-  // Listen for the delete success trigger from FastAPI to close the drawer automatically
-  document.body.addEventListener("slotDeleted", () => {
-    closeViewDrawer();
-  });
+  document.body.addEventListener("slotDeleted", () => closeViewDrawer());
 </script>

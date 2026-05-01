@@ -1,162 +1,80 @@
-<div class="max-w-3xl mx-auto px-2 sm:px-6 lg:px-8 py-8 sm:py-12">
+<div class="max-w-2xl mx-auto">
+  <header class="mb-8">
+    <h1 class="text-xl font-semibold tracking-tight text-[var(--color-ink)]">Create user</h1>
+    <p class="mt-1 text-sm" style="color: var(--color-muted);">Register a new resident or administrator on the platform.</p>
+  </header>
 
-    <!-- Page Header -->
-    <div class="mb-10">
-        <div class="flex items-center gap-4 mb-3">
-            <div class="flex items-center justify-center size-12 rounded-2xl bg-violet-600 text-white shadow-lg shadow-violet-200 dark:shadow-none">
-                <svg class="size-6" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M18 7.5v3m0 0v3m0-3h3m-3 0h-3m-2.25-4.125a3.375 3.375 0 1 1-6.75 0 3.375 3.375 0 0 1 6.75 0ZM3 19.235v-.11a6.375 6.375 0 0 1 12.75 0v.109A12.318 12.318 0 0 1 9.374 21c-2.331 0-4.512-.645-6.374-1.766Z" />
-                </svg>
+  {% if error_message %}
+  <div class="mb-5 flex items-start gap-3 px-4 py-3 rounded-md border" style="border-color: var(--color-danger); background: var(--color-danger-soft); color: var(--color-danger);">
+    <svg class="size-4 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+      <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m9-.75a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 3.75h.008v.008H12v-.008Z"/>
+    </svg>
+    <span class="text-sm font-medium">{{ error_message }}</span>
+  </div>
+  {% endif %}
+
+  <form id="create-user-form"
+        action="/admin/users/new" method="POST"
+        hx-post="/admin/users/new"
+        hx-target="#main-content"
+        hx-push-url="true"
+        class="card overflow-hidden">
+
+    <div class="p-5 grid grid-cols-1 sm:grid-cols-2 gap-x-5 gap-y-4">
+
+      <div>
+        <label for="full_name" class="label">Full name</label>
+        <input type="text" name="full_name" id="full_name" value="{{ full_name or '' }}" placeholder="Dr. Jane Smith" class="input">
+      </div>
+
+      <div>
+        <label for="email" class="label">Email address</label>
+        <input type="email" name="email" id="email" required value="{{ email or '' }}" placeholder="user@hospital.com" class="input">
+      </div>
+
+      <div>
+        <label for="password" class="label">Password</label>
+        <input type="password" name="password" id="password" required placeholder="Min. 8 characters" class="input">
+      </div>
+
+      <div>
+        <label for="confirm_password" class="label">Confirm password</label>
+        <input type="password" name="confirm_password" id="confirm_password" required placeholder="Re-enter password" class="input">
+      </div>
+
+      <div class="sm:col-span-2">
+        <label class="label">Role</label>
+        <div class="grid grid-cols-2 gap-3">
+          <label class="flex items-center gap-3 px-3 py-3 rounded-md border border-[var(--color-line-strong)] cursor-pointer transition-colors hover:bg-[var(--color-surface-hover)] has-[:checked]:border-[var(--color-accent)] has-[:checked]:bg-[var(--color-accent-soft)]">
+            <input type="radio" name="role" value="resident" class="sr-only" checked>
+            <div class="flex-1">
+              <p class="text-sm font-medium text-[var(--color-ink)]">Resident</p>
+              <p class="text-xs mt-0.5" style="color: var(--color-muted);">Can view and book shifts</p>
             </div>
-            <div>
-                <h1 class="text-2xl font-bold text-gray-900 dark:text-white tracking-tight sm:text-3xl">
-                    Create New User
-                </h1>
-                <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                    Register a new resident or administrator account on the platform.
-                </p>
+          </label>
+
+          <label class="flex items-center gap-3 px-3 py-3 rounded-md border border-[var(--color-line-strong)] cursor-pointer transition-colors hover:bg-[var(--color-surface-hover)] has-[:checked]:border-[var(--color-accent)] has-[:checked]:bg-[var(--color-accent-soft)]">
+            <input type="radio" name="role" value="admin" class="sr-only">
+            <div class="flex-1">
+              <p class="text-sm font-medium text-[var(--color-ink)]">Admin</p>
+              <p class="text-xs mt-0.5" style="color: var(--color-muted);">Full platform access</p>
             </div>
+          </label>
         </div>
+      </div>
     </div>
 
-    <!-- Error banner (shown on POST failure) -->
-    {% if error_message %}
-    <div class="mb-6 flex items-center gap-3 p-4 rounded-2xl bg-red-50 dark:bg-red-900/20 border border-red-100 dark:border-red-800/30 text-red-700 dark:text-red-400">
-        <svg class="size-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m9-.75a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 3.75h.008v.008H12v-.008Z" />
+    <div class="px-5 py-3 border-t border-[var(--color-line)] flex items-center justify-end gap-2">
+      <a href="/admin/users"
+         hx-get="/admin/users" hx-target="#main-content"
+         hx-swap="innerHTML transition:true" hx-push-url="true"
+         class="btn btn-secondary">Cancel</a>
+      <button type="submit" class="btn btn-primary">
+        <svg class="size-3.5" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5"/>
         </svg>
-        <span class="text-sm font-medium">{{ error_message }}</span>
+        Create user
+      </button>
     </div>
-    {% endif %}
-
-    <!-- Form — no card on mobile, card on sm+ -->
-    <form id="create-user-form"
-          action="/admin/users/new"
-          method="POST"
-          hx-post="/admin/users/new"
-          hx-target="#main-content"
-          hx-push-url="true"
-          class="sm:bg-white sm:dark:bg-gray-800 sm:rounded-3xl sm:border sm:border-gray-100 sm:dark:border-white/10 sm:shadow-sm sm:overflow-hidden">
-
-        <div class="sm:p-8 grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-8">
-
-            <!-- Full Name -->
-            <div class="space-y-2">
-                <label for="full_name" class="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest ml-1">Full Name</label>
-                <div class="relative">
-                    <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-gray-400">
-                        <svg class="size-4.5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z" />
-                        </svg>
-                    </div>
-                    <input type="text" name="full_name" id="full_name"
-                           value="{{ full_name or '' }}"
-                           placeholder="e.g. Dr. Jane Smith"
-                           class="block w-full rounded-2xl border-0 py-3 pl-11 pr-4 text-sm text-gray-900 dark:text-white dark:bg-white/5 shadow-sm ring-1 ring-inset ring-gray-200 dark:ring-white/10 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-violet-500 transition">
-                </div>
-            </div>
-
-            <!-- Email -->
-            <div class="space-y-2">
-                <label for="email" class="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest ml-1">Email Address</label>
-                <div class="relative">
-                    <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-gray-400">
-                        <svg class="size-4.5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 0 1-2.25 2.25h-15a2.25 2.25 0 0 1-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0 0 19.5 4.5h-15a2.25 2.25 0 0 0-2.25 2.25m19.5 0v.243a2.25 2.25 0 0 1-1.07 1.916l-7.5 4.615a2.25 2.25 0 0 1-2.36 0L3.32 8.91a2.25 2.25 0 0 1-1.07-1.916V6.75" />
-                        </svg>
-                    </div>
-                    <input type="email" name="email" id="email" required
-                           value="{{ email or '' }}"
-                           placeholder="user@hospital.com"
-                           class="block w-full rounded-2xl border-0 py-3 pl-11 pr-4 text-sm text-gray-900 dark:text-white dark:bg-white/5 shadow-sm ring-1 ring-inset ring-gray-200 dark:ring-white/10 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-violet-500 transition">
-                </div>
-            </div>
-
-            <!-- Password -->
-            <div class="space-y-2">
-                <label for="password" class="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest ml-1">Password</label>
-                <div class="relative">
-                    <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-gray-400">
-                        <svg class="size-4.5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 1 0-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 0 0 2.25-2.25v-6.75a2.25 2.25 0 0 0-2.25-2.25H6.75a2.25 2.25 0 0 0-2.25 2.25v6.75a2.25 2.25 0 0 0 2.25 2.25Z" />
-                        </svg>
-                    </div>
-                    <input type="password" name="password" id="password" required
-                           placeholder="Min. 8 characters"
-                           class="block w-full rounded-2xl border-0 py-3 pl-11 pr-4 text-sm text-gray-900 dark:text-white dark:bg-white/5 shadow-sm ring-1 ring-inset ring-gray-200 dark:ring-white/10 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-violet-500 transition">
-                </div>
-            </div>
-
-            <!-- Confirm Password -->
-            <div class="space-y-2">
-                <label for="confirm_password" class="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest ml-1">Confirm Password</label>
-                <div class="relative">
-                    <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-gray-400">
-                        <svg class="size-4.5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75m-3-7.036A11.959 11.959 0 0 1 3.598 6 11.99 11.99 0 0 0 3 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285Z" />
-                        </svg>
-                    </div>
-                    <input type="password" name="confirm_password" id="confirm_password" required
-                           placeholder="Re-enter password"
-                           class="block w-full rounded-2xl border-0 py-3 pl-11 pr-4 text-sm text-gray-900 dark:text-white dark:bg-white/5 shadow-sm ring-1 ring-inset ring-gray-200 dark:ring-white/10 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-violet-500 transition">
-                </div>
-            </div>
-
-            <!-- Role Picker -->
-            <div class="space-y-2 sm:col-span-2">
-                <label class="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest ml-1">Role</label>
-                <div class="grid grid-cols-2 gap-3">
-
-                    <label class="relative flex items-center gap-4 px-5 py-4 rounded-2xl border border-gray-200 dark:border-white/10 cursor-pointer hover:bg-gray-50 dark:hover:bg-white/5 transition-all has-[:checked]:ring-2 has-[:checked]:ring-violet-500 has-[:checked]:border-violet-500 has-[:checked]:bg-violet-50/30 dark:has-[:checked]:bg-violet-900/20">
-                        <input type="radio" name="role" value="resident" class="sr-only" checked>
-                        <div class="flex items-center justify-center size-9 rounded-xl bg-violet-50 dark:bg-violet-900/30 text-violet-600 dark:text-violet-400 shrink-0">
-                            <svg class="size-5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z" />
-                            </svg>
-                        </div>
-                        <div>
-                            <p class="text-sm font-semibold text-gray-900 dark:text-white">Resident</p>
-                            <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Can view and book shifts</p>
-                        </div>
-                    </label>
-
-                    <label class="relative flex items-center gap-4 px-5 py-4 rounded-2xl border border-gray-200 dark:border-white/10 cursor-pointer hover:bg-gray-50 dark:hover:bg-white/5 transition-all has-[:checked]:ring-2 has-[:checked]:ring-indigo-500 has-[:checked]:border-indigo-500 has-[:checked]:bg-indigo-50/30 dark:has-[:checked]:bg-indigo-900/20">
-                        <input type="radio" name="role" value="admin" class="sr-only">
-                        <div class="flex items-center justify-center size-9 rounded-xl bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 shrink-0">
-                            <svg class="size-5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75m-3-7.036A11.959 11.959 0 0 1 3.598 6 11.99 11.99 0 0 0 3 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285Z" />
-                            </svg>
-                        </div>
-                        <div>
-                            <p class="text-sm font-semibold text-gray-900 dark:text-white">Admin</p>
-                            <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Full platform access</p>
-                        </div>
-                    </label>
-
-                </div>
-            </div>
-
-        </div>
-
-        <!-- Form Actions -->
-        <div class="mt-10 pt-8 border-t border-gray-100 dark:border-white/10 flex flex-col sm:flex-row items-center justify-end gap-3 sm:px-8 sm:pb-8">
-            <a href="/admin/users"
-               hx-get="/admin/users"
-               hx-target="#main-content"
-               hx-swap="innerHTML transition:true"
-               hx-push-url="true"
-               class="inline-flex items-center justify-center w-full sm:w-auto px-6 py-2.5 text-sm font-semibold text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-800 border border-gray-200 dark:border-white/10 rounded-xl shadow-sm hover:bg-gray-50 dark:hover:bg-white/5 transition-all">
-                Cancel
-            </a>
-            <button type="submit"
-                    class="inline-flex items-center justify-center w-full sm:w-auto gap-2 px-8 py-2.5 text-sm font-semibold text-white bg-violet-600 rounded-xl shadow-md shadow-violet-200 dark:shadow-none hover:bg-violet-500 active:bg-violet-700 transition-all">
-                <svg class="size-4" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5" />
-                </svg>
-                Create User
-            </button>
-        </div>
-
-    </form>
-
+  </form>
 </div>

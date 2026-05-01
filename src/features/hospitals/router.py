@@ -33,25 +33,18 @@ async def hospital_nav_list(
     html = ""
     for hospital in hospitals:
         is_active = (active_short_name == hospital.short_name) or (f"/hospitals/{hospital.short_name}" in current_url)
-        
-        # Use more distinct active classes
-        if is_active:
-            active_classes = "bg-indigo-600 text-white shadow-sm"
-            icon_classes = "border-indigo-200 bg-indigo-500 text-white"
-        else:
-            active_classes = "text-gray-700 hover:bg-gray-50 hover:text-indigo-600 dark:text-gray-400 dark:hover:bg-white/5 dark:hover:text-white"
-            icon_classes = "border-gray-200 bg-white text-gray-400 group-hover:border-indigo-600 group-hover:text-indigo-600 dark:border-white/10 dark:bg-white/5 dark:group-hover:border-white/20 dark:group-hover:text-white"
+        active_attr = ' aria-current="page"' if is_active else ""
 
         html += f"""
         <li>
-            <a href="/hospitals/{hospital.short_name}" 
-               hx-get="/hospitals/{hospital.short_name}" 
-               hx-target="#main-content" 
-               hx-swap="innerHTML transition:true" 
+            <a href="/hospitals/{hospital.short_name}"
+               hx-get="/hospitals/{hospital.short_name}"
+               hx-target="#main-content"
+               hx-swap="innerHTML transition:true"
                hx-push-url="true"
                onclick="document.getElementById('sidebar').close()"
-               class="group flex gap-x-3 rounded-md p-2 text-sm font-semibold {active_classes}">
-                <span class="flex size-6 shrink-0 items-center justify-center rounded-lg border text-[0.625rem] font-medium {icon_classes}">
+               class="nav-item"{active_attr}>
+                <span class="inline-flex size-5 shrink-0 items-center justify-center rounded text-[10px] font-mono font-medium border border-[var(--color-line)] bg-[var(--color-surface)]" style="color: var(--color-muted);">
                     {hospital.name[0].upper()}
                 </span>
                 <span class="truncate">{hospital.name}</span>

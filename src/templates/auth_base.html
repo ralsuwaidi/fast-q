@@ -1,20 +1,23 @@
 <!DOCTYPE html>
-<html lang="en" class="h-full bg-white dark:bg-gray-900">
+<html lang="en" class="h-full">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}Sign In | ShiftSync{% endblock %}</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
     <link href="/static/output.css" rel="stylesheet">
     <script src="https://unpkg.com/htmx.org@1.9.11" crossorigin="anonymous"></script>
     <style>
         @keyframes shake {
             0%, 100% { transform: translateX(0); }
-            25% { transform: translateX(-8px); }
-            75% { transform: translateX(8px); }
+            25% { transform: translateX(-6px); }
+            75% { transform: translateX(6px); }
         }
-        .animate-shake {
-            animation: shake 0.2s ease-in-out 0s 2;
-        }
+        .animate-shake { animation: shake 0.2s ease-in-out 0s 2; }
     </style>
 </head>
 <body class="h-full">
