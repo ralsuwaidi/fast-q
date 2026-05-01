@@ -1,192 +1,149 @@
-<div class="max-w-3xl mx-auto py-10 px-4 sm:px-6 lg:px-8">
-  <!-- Header -->
-  <div class="mb-8">
+<div class="mx-auto max-w-3xl px-4 py-10 sm:px-6 lg:px-8">
+  <!-- Page Header -->
+  <div class="mb-10">
     <div class="flex items-center gap-3">
-      <span class="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-indigo-50 text-indigo-600 ring-1 ring-inset ring-indigo-600/10 dark:bg-indigo-400/10 dark:text-indigo-400 dark:ring-indigo-400/20">
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-6 w-6" aria-hidden="true">
+      <span class="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10 text-primary">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-5 w-5" aria-hidden="true">
           <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" />
         </svg>
       </span>
       <div>
-        <h2 class="text-2xl font-bold leading-7 text-gray-900 dark:text-white sm:text-3xl sm:tracking-tight">
+        <h1 class="text-2xl font-bold sm:text-3xl">
           {% if slot %}Edit Slot{% elif master_slot_id %}Book Shift{% else %}Add Custom Slot{% endif %}
-        </h2>
-        <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
+        </h1>
+        <p class="mt-1 text-sm text-base-content/70">
           {% if slot %}Update the details for this shift.{% else %}Fill in the details below to add this shift to your personal calendar.{% endif %}
         </p>
       </div>
     </div>
   </div>
 
-  <!-- Form Card -->
+  <!-- Form -->
   <form id="custom-slot-form"
         action="{% if slot %}/my-calendar/slots/{{ slot.id }}/edit{% else %}/my-calendar{% endif %}"
         method="POST"
         hx-post="{% if slot %}/my-calendar/slots/{{ slot.id }}/edit{% else %}/my-calendar{% endif %}"
         hx-target="#main-content"
         hx-push-url="true"
-        class="relative overflow-hidden bg-white dark:bg-gray-800 shadow-md ring-1 ring-gray-900/5 dark:ring-white/10 sm:rounded-2xl transition-all duration-200">
+        class="space-y-8">
 
     {% if error_message %}
-      <div class="flex items-center gap-3 border-b border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 dark:border-red-800 dark:bg-red-900/20 dark:text-red-400 sm:px-6">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="h-5 w-5 flex-shrink-0 text-red-400">
-          <path fill-rule="evenodd" d="M8.485 2.495c.673-1.167 2.357-1.167 3.03 0l6.28 10.875c.673 1.167-.17 2.625-1.516 2.625H3.72c-1.347 0-2.189-1.458-1.515-2.625L8.485 2.495zM10 6a.75.75 0 01.75.75v3.5a.75.75 0 01-1.5 0v-3.5A.75.75 0 0110 6zm0 9a1 1 0 100-2 1 1 0 000 2z" clip-rule="evenodd" />
+      <div class="alert alert-error">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 shrink-0 stroke-current" fill="none" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
         </svg>
         <span>{{ error_message|safe }}</span>
       </div>
     {% endif %}
 
-    <!-- Form Fields -->
-    <div class="px-4 py-6 sm:p-8">
-      <div class="grid max-w-2xl grid-cols-1 gap-x-8 gap-y-8 sm:grid-cols-6">
+    <!-- Fields Grid -->
+    <div class="grid max-w-2xl grid-cols-1 gap-6 sm:grid-cols-6">
+      <!-- Hospital -->
+      <div class="form-control w-full sm:col-span-3">
+        <label class="label" for="hospital_name">
+          <span class="label-text">Hospital</span>
+        </label>
+        <input type="text" name="hospital_name" id="hospital_name" value="{{ hospital_name }}" required
+               placeholder="Enter hospital name"
+               class="input input-bordered w-full">
+      </div>
 
-        <!-- Hospital -->
-        <div class="sm:col-span-3">
-          <label for="hospital_name" class="flex items-center gap-2 text-sm font-medium leading-6 text-gray-900 dark:text-white">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="h-4 w-4 text-gray-400 dark:text-gray-500">
-              <path fill-rule="evenodd" d="M4 16.5v-13h-.25a.75.75 0 010-1.5h12.5a.75.75 0 010 1.5H16v13h.25a.75.75 0 010 1.5h-12.5a.75.75 0 010-1.5H4zm3-10a.5.5 0 01.5-.5h.75V5.25a.75.75 0 011.5 0V6h.75a.5.5 0 010 1h-.75v.75a.75.75 0 01-1.5 0V7h-.75a.5.5 0 01-.5-.5zm2 5.5a1 1 0 11-2 0 1 1 0 012 0zm2 2.5a1 1 0 100-2 1 1 0 000 2zm-2 2a1 1 0 11-2 0 1 1 0 012 0z" clip-rule="evenodd" />
-            </svg>
-            Hospital
-          </label>
-          <div class="mt-2">
-            <input type="text" name="hospital_name" id="hospital_name" value="{{ hospital_name }}" required
-                   class="block w-full rounded-lg border-0 py-2 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6 dark:bg-white/5 dark:text-white dark:ring-white/10 dark:focus:ring-indigo-500 transition-all duration-200">
-          </div>
-        </div>
+      <!-- Physician -->
+      <div class="form-control w-full sm:col-span-3">
+        <label class="label" for="physician">
+          <span class="label-text">Physician</span>
+        </label>
+        <input type="text" name="physician" id="physician" value="{{ physician }}" required
+               placeholder="Enter physician name"
+               class="input input-bordered w-full">
+      </div>
 
-        <!-- Physician -->
-        <div class="sm:col-span-3">
-          <label for="physician" class="flex items-center gap-2 text-sm font-medium leading-6 text-gray-900 dark:text-white">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="h-4 w-4 text-gray-400 dark:text-gray-500">
-              <path d="M10 8a3 3 0 100-6 3 3 0 000 6zM3.465 14.493a1.23 1.23 0 00.41 1.412A9.957 9.957 0 0010 18c2.31 0 4.438-.784 6.131-2.1.43-.333.604-.903.408-1.41a7.002 7.002 0 00-13.074.003z" />
-            </svg>
-            Physician
-          </label>
-          <div class="mt-2">
-            <input type="text" name="physician" id="physician" value="{{ physician }}" required
-                   class="block w-full rounded-lg border-0 py-2 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6 dark:bg-white/5 dark:text-white dark:ring-white/10 dark:focus:ring-indigo-500 transition-all duration-200">
-          </div>
-        </div>
+      <!-- Specialty -->
+      <div class="form-control w-full sm:col-span-3">
+        <label class="label" for="specialty">
+          <span class="label-text">Specialty</span>
+        </label>
+        <input type="text" name="specialty" id="specialty" value="{{ specialty }}"
+               placeholder="e.g. Cardiology"
+               class="input input-bordered w-full">
+      </div>
 
-        <!-- Specialty -->
-        <div class="sm:col-span-3">
-          <label for="specialty" class="flex items-center gap-2 text-sm font-medium leading-6 text-gray-900 dark:text-white">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="h-4 w-4 text-gray-400 dark:text-gray-500">
-              <path fill-rule="evenodd" d="M9.664 1.319a.75.75 0 01.672 0 41.059 41.059 0 018.133 5.648.75.75 0 01-.21 1.274C15.534 9.273 13.09 12.22 12 16c-.77 2.667-2.568 4.11-4.947 4.11-2.935 0-5.08-2.372-5.053-5.24C2.049 9.751 4.89 6.047 9.664 1.319zM10 15a2.5 2.5 0 100-5 2.5 2.5 0 000 5z" clip-rule="evenodd" />
-            </svg>
-            Specialty
-          </label>
-          <div class="mt-2">
-            <input type="text" name="specialty" id="specialty" value="{{ specialty }}"
-                   class="block w-full rounded-lg border-0 py-2 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6 dark:bg-white/5 dark:text-white dark:ring-white/10 dark:focus:ring-indigo-500 transition-all duration-200">
-          </div>
-        </div>
+      <!-- Contact Email -->
+      <div class="form-control w-full sm:col-span-3">
+        <label class="label" for="contact_email">
+          <span class="label-text">Contact Email</span>
+        </label>
+        <input type="email" name="contact_email" id="contact_email" value="{{ contact_email }}" required
+               placeholder="you@example.com"
+               class="input input-bordered w-full">
+      </div>
 
-        <!-- Contact Email -->
-        <div class="sm:col-span-3">
-          <label for="contact_email" class="flex items-center gap-2 text-sm font-medium leading-6 text-gray-900 dark:text-white">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="h-4 w-4 text-gray-400 dark:text-gray-500">
-              <path d="M3 4a2 2 0 00-2 2v1.161l8.441 4.221a1.25 1.25 0 001.118 0L19 7.162V6a2 2 0 00-2-2H3z" />
-              <path d="M19 8.839l-7.77 3.885a2.75 2.75 0 01-2.46 0L1 8.839V14a2 2 0 002 2h14a2 2 0 002-2V8.839z" />
-            </svg>
-            Contact Email
-          </label>
-          <div class="mt-2">
-            <input type="email" name="contact_email" id="contact_email" value="{{ contact_email }}" required
-                   class="block w-full rounded-lg border-0 py-2 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6 dark:bg-white/5 dark:text-white dark:ring-white/10 dark:focus:ring-indigo-500 transition-all duration-200">
-          </div>
-        </div>
+      <!-- Date -->
+      <div class="form-control w-full sm:col-span-3">
+        <label class="label" for="date">
+          <span class="label-text">Date</span>
+        </label>
+        <input type="date" name="date" id="date" value="{{ selected_date if selected_date else '' }}" required
+               class="input input-bordered w-full">
+      </div>
 
-        <!-- Date -->
-        <div class="sm:col-span-3">
-          <label for="date" class="flex items-center gap-2 text-sm font-medium leading-6 text-gray-900 dark:text-white">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="h-4 w-4 text-gray-400 dark:text-gray-500">
-              <path fill-rule="evenodd" d="M5.75 2a.75.75 0 01.75.75V4h7V2.75a.75.75 0 011.5 0V4h.25A2.75 2.75 0 0118 6.75v8.5A2.75 2.75 0 0115.25 18H4.75A2.75 2.75 0 012 15.25v-8.5A2.75 2.75 0 014.75 4H5V2.75A.75.75 0 015.75 2zm-1 5.5c-.69 0-1.25.56-1.25 1.25v6.5c0 .69.56 1.25 1.25 1.25h10.5c.69 0 1.25-.56 1.25-1.25v-6.5c0-.69-.56-1.25-1.25-1.25H4.75z" clip-rule="evenodd" />
-            </svg>
-            Date
-          </label>
-          <div class="mt-2">
-            <input type="date" name="date" id="date" value="{{ selected_date if selected_date else '' }}" required
-                   class="block w-full rounded-lg border-0 py-2 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6 dark:bg-white/5 dark:text-white dark:ring-white/10 dark:focus:ring-indigo-500 transition-all duration-200">
-          </div>
-        </div>
+      <!-- Time Block -->
+      <div class="form-control w-full sm:col-span-3">
+        <label class="label" for="time_block">
+          <span class="label-text">Time Block</span>
+        </label>
+        <input type="text" name="time_block" id="time_block" value="{{ time_block_override }}" required
+               placeholder="e.g. 9 AM - 5 PM"
+               class="input input-bordered w-full">
+      </div>
 
-        <!-- Time Block -->
-        <div class="sm:col-span-3">
-          <label for="time_block" class="flex items-center gap-2 text-sm font-medium leading-6 text-gray-900 dark:text-white">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="h-4 w-4 text-gray-400 dark:text-gray-500">
-              <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm.75-13a.75.75 0 00-1.5 0v5c0 .414.336.75.75.75h4a.75.75 0 000-1.5h-3.25V5z" clip-rule="evenodd" />
-            </svg>
-            Time Block
-          </label>
-          <div class="mt-2">
-            <input type="text" name="time_block" id="time_block" value="{{ time_block_override }}" required
-                   class="block w-full rounded-lg border-0 py-2 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6 dark:bg-white/5 dark:text-white dark:ring-white/10 dark:focus:ring-indigo-500 transition-all duration-200">
-          </div>
-        </div>
+      <!-- Status -->
+      <div class="form-control w-full sm:col-span-3">
+        <label class="label" for="status">
+          <span class="label-text">Status</span>
+        </label>
+        <select id="status" name="status" class="select select-bordered w-full">
+          <option value="To Contact" {% if status == 'To Contact' %}selected{% endif %}>To Contact</option>
+          <option value="Emailed" {% if status == 'Emailed' %}selected{% endif %}>Emailed</option>
+          <option value="Confirmed" {% if status == 'Confirmed' %}selected{% endif %}>Confirmed</option>
+        </select>
+      </div>
 
-        <!-- Status -->
-        <div class="sm:col-span-3">
-          <label for="status" class="flex items-center gap-2 text-sm font-medium leading-6 text-gray-900 dark:text-white">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="h-4 w-4 text-gray-400 dark:text-gray-500">
-              <path fill-rule="evenodd" d="M10.362 1.093a.75.75 0 00-.724 0L2.523 5.018 10 9.143l7.477-4.125-7.115-3.925zM18 6.443l-7.25 4v8.25l6.862-3.786A1.75 1.75 0 0018.5 13.4V6.443zm-8.75 4v8.25l-6.862-3.786A1.75 1.75 0 011.5 13.4V6.443l7.75 4.275V10.443z" clip-rule="evenodd" />
-            </svg>
-            Status
-          </label>
-          <div class="mt-2 relative">
-            <select id="status" name="status"
-                    class="block w-full appearance-none rounded-lg border-0 py-2 pl-3 pr-10 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6 dark:bg-white/5 dark:text-white dark:ring-white/10 dark:focus:ring-indigo-500 transition-all duration-200">
-              <option value="To Contact" {% if status == 'To Contact' %}selected{% endif %}>To Contact</option>
-              <option value="Emailed" {% if status == 'Emailed' %}selected{% endif %}>Emailed</option>
-              <option value="Confirmed" {% if status == 'Confirmed' %}selected{% endif %}>Confirmed</option>
-            </select>
-            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2">
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="h-5 w-5 text-gray-400 dark:text-gray-500">
-                <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd" />
-              </svg>
-            </div>
-          </div>
-        </div>
-
-        <!-- Notes -->
-        <div class="col-span-full">
-          <label for="notes" class="flex items-center gap-2 text-sm font-medium leading-6 text-gray-900 dark:text-white">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="h-4 w-4 text-gray-400 dark:text-gray-500">
-              <path fill-rule="evenodd" d="M4.25 2A2.25 2.25 0 002 4.25v11.5A2.25 2.25 0 004.25 18h11.5A2.25 2.25 0 0018 15.75V7.22a2.25 2.25 0 00-.607-1.545l-4.318-4.318A2.25 2.25 0 0011.53 2H4.25zm1.5 4.5a.75.75 0 000 1.5h6a.75.75 0 000-1.5h-6zm0 3a.75.75 0 000 1.5h6a.75.75 0 000-1.5h-6zm0 3a.75.75 0 000 1.5h4a.75.75 0 000-1.5h-4z" clip-rule="evenodd" />
-            </svg>
-            Notes
-          </label>
-          <div class="mt-2">
-            <textarea id="notes" name="notes" rows="3"
-                      class="block w-full rounded-lg border-0 py-2 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6 dark:bg-white/5 dark:text-white dark:ring-white/10 dark:focus:ring-indigo-500 transition-all duration-200">{{ notes if notes else '' }}</textarea>
-          </div>
-          <p class="mt-2 text-sm leading-6 text-gray-500 dark:text-gray-400">Write any personal notes regarding this shift.</p>
-        </div>
-
+      <!-- Notes -->
+      <div class="form-control w-full col-span-full">
+        <label class="label" for="notes">
+          <span class="label-text">Notes</span>
+        </label>
+        <textarea id="notes" name="notes" rows="3"
+                  placeholder="Add personal notes..."
+                  class="textarea textarea-bordered w-full">{{ notes if notes else '' }}</textarea>
+        <label class="label">
+          <span class="label-text-alt">Write any personal notes regarding this shift.</span>
+        </label>
       </div>
     </div>
 
-    <!-- Footer / Actions -->
-    <div class="flex items-center justify-end gap-x-4 border-t border-gray-900/10 dark:border-white/10 px-4 py-4 sm:px-8 bg-gray-50 dark:bg-gray-900/50 rounded-b-2xl">
+    <!-- Actions -->
+    <div class="flex items-center justify-end gap-3 border-t border-base-300 pt-6">
       {% if slot %}
       <button type="button"
               hx-delete="/my-calendar/slots/{{ slot.id }}"
               hx-confirm="Are you sure you want to delete this slot? This cannot be undone."
               hx-target="#main-content"
               hx-push-url="true"
-              class="group mr-auto inline-flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-semibold text-red-600 hover:text-red-700 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-900/20 transition-colors">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="h-4 w-4 group-hover:text-red-500 transition-colors">
+              class="btn btn-ghost btn-error mr-auto">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="h-4 w-4">
           <path fill-rule="evenodd" d="M8.75 1A2.25 2.25 0 006.5 3.25v.75H3.25a.75.75 0 000 1.5h.25v9A2.75 2.75 0 006.25 17h7.5A2.75 2.75 0 0016.5 14.25v-9h.25a.75.75 0 000-1.5h-3.25v-.75A2.25 2.25 0 0011.25 1h-2.5zM12 4.75v-.75a.75.75 0 00-.75-.75h-2.5a.75.75 0 00-.75.75v.75h4zm-3.75 3a.75.75 0 01.75.75v6a.75.75 0 01-1.5 0v-6a.75.75 0 01.75-.75zm4.5 0a.75.75 0 01.75.75v6a.75.75 0 01-1.5 0v-6a.75.75 0 01.75-.75z" clip-rule="evenodd" />
         </svg>
         Delete Slot
       </button>
       {% endif %}
       <button type="button" onclick="history.back()"
-              class="rounded-lg px-4 py-2 text-sm font-semibold text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 ring-1 ring-inset ring-gray-300 dark:ring-white/10 transition-colors">
+              class="btn btn-outline">
         Cancel
       </button>
       <button type="submit"
-              class="inline-flex items-center gap-1.5 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 transition-colors">
+              class="btn btn-primary">
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="h-4 w-4">
           <path fill-rule="evenodd" d="M16.704 4.153a.75.75 0 01.143 1.052l-8 10.5a.75.75 0 01-1.127.075l-4.5-4.5a.75.75 0 011.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 011.05-.143z" clip-rule="evenodd" />
         </svg>
