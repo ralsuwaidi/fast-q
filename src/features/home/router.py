@@ -30,6 +30,7 @@ async def dashboard_page(
 ):
     """Renders the dashboard with hospital cards."""
     hospitals = GetAllHospitalsHandler(db).execute(GetAllHospitalsQuery())
+    residents = db.exec(select(User)).all()
     
     template_name = "partials/dashboard_content.html" if request.headers.get("hx-request") else "dashboard.html"
     
@@ -38,6 +39,7 @@ async def dashboard_page(
         name=template_name,
         context={
             "hospitals": hospitals,
+            "residents_count": len(residents),
             "current_user": current_user
         }
     )
