@@ -68,7 +68,7 @@ async def process_logout():
     """Handles logging out by clearing the session cookie."""
     res = Response(
         status_code=200,
-        headers={"HX-Redirect": "/login"},
+        headers={"HX-Redirect": "/"},
     )
     res.delete_cookie(key="user_session")
     return res

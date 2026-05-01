@@ -11,7 +11,7 @@
             <h1 class="text-2xl font-bold text-gray-900 dark:text-white tracking-tight">Hospitals Dashboard</h1>
         </div>
         <p class="ml-13 text-sm text-gray-500 dark:text-gray-400 pl-[52px]">
-            Select a hospital to view its master schedule, or add a new one below.
+            Select a hospital to view its master schedule{% if current_user and current_user.role == 'admin' %}, or add a new one below{% endif %}.
         </p>
     </div>
 
@@ -105,12 +105,19 @@
                 </svg>
             </div>
             <p class="text-sm font-medium text-gray-900 dark:text-white">No hospitals yet</p>
-            <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Get started by creating your first hospital below.</p>
+            <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                {% if current_user and current_user.role == 'admin' %}
+                    Get started by creating your first hospital below.
+                {% else %}
+                    Please contact an administrator to register hospitals.
+                {% endif %}
+            </p>
         </div>
         {% endif %}
     </div>
 
-    <!-- Create New Hospital Section -->
+    <!-- Create New Hospital Section (Admin Only) -->
+    {% if current_user and current_user.role == 'admin' %}
     <div class="mt-12 bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-white/10 shadow-sm overflow-hidden">
         <!-- Section header with left accent -->
         <div class="flex items-center gap-3 px-6 py-5 border-b border-gray-100 dark:border-white/10">
@@ -157,5 +164,6 @@
             </form>
         </div>
     </div>
+    {% endif %}
 
 </div>
