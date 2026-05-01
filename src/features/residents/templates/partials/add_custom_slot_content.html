@@ -99,9 +99,12 @@
                 <!-- Time Block -->
                 <div class="space-y-2">
                     <label for="time_block" class="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest ml-1">Time Block</label>
-                    <input type="text" name="time_block" id="time_block" value="{{ time_block_override }}" required
-                           placeholder="e.g. 9 AM - 5 PM"
-                           class="block w-full rounded-2xl border-0 py-3 px-4 text-sm text-gray-900 dark:text-white dark:bg-white/5 shadow-sm ring-1 ring-inset ring-gray-200 dark:ring-white/10 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-500 transition">
+                    <select name="time_block" id="time_block" required
+                            class="block w-full rounded-2xl border-0 py-3 px-4 text-sm text-gray-900 dark:text-white dark:bg-white/5 shadow-sm ring-1 ring-inset ring-gray-200 dark:ring-white/10 focus:ring-2 focus:ring-inset focus:ring-indigo-500 transition appearance-none">
+                        <option value="AM" {% if time_block_override == 'AM' %}selected{% endif %}>AM</option>
+                        <option value="PM" {% if time_block_override == 'PM' %}selected{% endif %}>PM</option>
+                        <option value="AM/PM" {% if time_block_override == 'AM/PM' %}selected{% endif %}>AM/PM</option>
+                    </select>
                 </div>
 
                 <!-- Status -->

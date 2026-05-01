@@ -157,9 +157,10 @@
         </div>
 
         <div class="px-6 py-5">
+            <div id="hospital-error"></div>
             <form hx-post="/hospitals/new"
-                  hx-target="#main-content"
-                  hx-swap="innerHTML transition:true"
+                  hx-target="#hospital-error"
+                  hx-swap="innerHTML"
                   class="flex flex-col sm:flex-row sm:items-end gap-3">
 
                 <div class="flex-1 min-w-0">
@@ -173,6 +174,8 @@
                 <div class="sm:w-44">
                     <label for="hospital-short-name" class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1.5">Short Name</label>
                     <input type="text" name="short_name" id="hospital-short-name"
+                           pattern="^\S+$"
+                           title="Short name cannot contain spaces"
                            class="block w-full rounded-xl border-0 py-2 px-3.5 text-sm text-gray-900 dark:text-white dark:bg-white/5 shadow-sm ring-1 ring-inset ring-gray-200 dark:ring-white/10 placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:ring-2 focus:ring-inset focus:ring-indigo-500 font-mono transition"
                            placeholder="e.g. rvh"
                            required>

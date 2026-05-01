@@ -12,6 +12,8 @@ class CreateHospitalHandler:
         self.db = db
 
     def execute(self, command: CreateHospitalCommand) -> Hospital:
+        if " " in command.short_name:
+            raise ValueError("Short name cannot contain spaces")
         hospital = Hospital(name=command.name, short_name=command.short_name)
         self.db.add(hospital)
         self.db.commit()

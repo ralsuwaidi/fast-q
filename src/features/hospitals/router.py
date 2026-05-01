@@ -218,8 +218,37 @@ async def create_hospital(
     db: Session = Depends(get_session),
     current_user: User | None = Depends(get_current_user),
 ):
-    command = CreateHospitalCommand(name=name, short_name=short_name)
-    hospital = CreateHospitalHandler(db).execute(command)
+    if not current_user or current_user.role.value != "admin":
+        return HTMLResponse("Unauthorized", status_code=403)
+
+    if " " in short_name:
+        return HTMLResponse(
+            content="""
+            <div class="animate-shake flex items-center gap-3 p-4 mb-4 bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-400 border border-red-200 dark:border-red-800/30 rounded-2xl text-sm font-medium shadow-sm">
+                <svg class="size-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m9-.75a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 3.75h.008v.008H12v-.008Z" />
+                </svg>
+                <span>Short name cannot contain spaces.</span>
+            </div>
+            """,
+            status_code=200, # HTMX handles 200 with content swap
+        )
+
+    try:
+        command = CreateHospitalCommand(name=name, short_name=short_name)
+        hospital = CreateHospitalHandler(db).execute(command)
+    except ValueError as e:
+        return HTMLResponse(
+            content=f"""
+            <div class="animate-shake flex items-center gap-3 p-4 mb-4 bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-400 border border-red-200 dark:border-red-800/30 rounded-2xl text-sm font-medium shadow-sm">
+                <svg class="size-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m9-.75a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 3.75h.008v.008H12v-.008Z" />
+                </svg>
+                <span>{str(e)}</span>
+            </div>
+            """,
+            status_code=200,
+        )
 
     response = HTMLResponse()
     response.headers["HX-Redirect"] = "/dashboard"
