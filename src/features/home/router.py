@@ -156,3 +156,29 @@ async def create_user(
     # Success → redirect back to the users list
     response = RedirectResponse(url="/admin/users", status_code=303)
     return response
+
+
+# ==========================================
+# ADMIN: DELETE USER
+# ==========================================
+@router.delete("/admin/users/{user_id}", response_class=HTMLResponse)
+async def delete_user(
+    user_id: str,
+    request: Request,
+    db: Session = Depends(get_session),
+    current_user: User | None = Depends(get_current_user),
+):
+    """Deletes a user (admin only)."""
+    if not current_user or current_user.role != "admin":
+        return HTMLResponse("Unauthorized", status_code=403)
+
+    if str(current_user.id) == user_id:
+        return HTMLResponse("You cannot delete your own account.", status_code=400)
+
+    user = db.get(User, user_id)
+    if user:
+        db.delete(user)
+        db.commit()
+
+    # Re-render the admin users page (as a partial if requested via HTMX)
+    return await admin_users_page(request, db, current_user)
