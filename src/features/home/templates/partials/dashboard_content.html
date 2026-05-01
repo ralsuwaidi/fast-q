@@ -39,6 +39,29 @@
                 <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ hospitals | length }}</p>
             </div>
         </div>
+        {% if current_user and current_user.role == 'admin' %}
+        <a href="/admin/users"
+           hx-get="/admin/users"
+           hx-target="#main-content"
+           hx-swap="innerHTML transition:true"
+           hx-push-url="true"
+           class="group flex items-center gap-4 bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-white/10 shadow-sm px-5 py-4 hover:shadow-md hover:border-violet-400 dark:hover:border-violet-500 transition-all duration-200 cursor-pointer">
+            <div class="flex items-center justify-center size-10 rounded-xl bg-violet-50 dark:bg-violet-900/30 text-violet-600 dark:text-violet-400 shrink-0 group-hover:bg-violet-100 dark:group-hover:bg-violet-800/40 transition-colors duration-200">
+                <svg class="size-5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z" />
+                </svg>
+            </div>
+            <div class="flex-1 min-w-0">
+                <p class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">Staff Managed</p>
+                <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ residents_count }}</p>
+            </div>
+            <span class="flex items-center justify-center size-6 rounded-full bg-violet-50 dark:bg-violet-900/30 text-violet-500 dark:text-violet-400 group-hover:bg-violet-600 group-hover:text-white transition-all duration-200 shrink-0">
+                <svg class="size-3.5" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" />
+                </svg>
+            </span>
+        </a>
+        {% else %}
         <div class="flex items-center gap-4 bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-white/10 shadow-sm px-5 py-4">
             <div class="flex items-center justify-center size-10 rounded-xl bg-violet-50 dark:bg-violet-900/30 text-violet-600 dark:text-violet-400 shrink-0">
                 <svg class="size-5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
@@ -50,6 +73,7 @@
                 <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ residents_count }}</p>
             </div>
         </div>
+        {% endif %}
     </div>
 
     <!-- Section Label -->

@@ -1,0 +1,166 @@
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+
+    <!-- Page Header -->
+    <div class="mb-8 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+            <div class="flex items-center gap-3 mb-2">
+                <div class="flex items-center justify-center size-10 rounded-xl bg-violet-600 text-white shadow-md">
+                    <svg class="size-5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M18 18.72a9.094 9.094 0 0 0 3.741-.479 3 3 0 0 0-4.682-2.72m.94 3.198.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0 1 12 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 0 1 6 18.719m12 0a5.971 5.971 0 0 0-.941-3.197m0 0A5.995 5.995 0 0 0 12 12.75a5.995 5.995 0 0 0-5.058 2.772m0 0a3 3 0 0 0-4.681 2.72 8.986 8.986 0 0 0 3.74.477m.94-3.197a5.971 5.971 0 0 0-.94 3.197M15 6.75a3 3 0 1 1-6 0 3 3 0 0 1 6 0Zm6 3a2.25 2.25 0 1 1-4.5 0 2.25 2.25 0 0 1 4.5 0Zm-13.5 0a2.25 2.25 0 1 1-4.5 0 2.25 2.25 0 0 1 4.5 0Z" />
+                    </svg>
+                </div>
+                <h1 class="text-2xl font-bold text-gray-900 dark:text-white tracking-tight">Platform Users</h1>
+            </div>
+            <p class="text-sm text-gray-500 dark:text-gray-400 pl-[52px]">
+                All registered residents and administrators on the platform.
+            </p>
+        </div>
+        <div class="pl-[52px] sm:pl-0">
+            <a href="/dashboard"
+               hx-get="/dashboard"
+               hx-target="#main-content"
+               hx-swap="innerHTML transition:true"
+               hx-push-url="true"
+               class="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-800 border border-gray-200 dark:border-white/10 rounded-xl shadow-sm hover:bg-gray-50 dark:hover:bg-white/5 transition-all duration-200">
+                <svg class="size-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5 3 12m0 0 7.5-7.5M3 12h18" />
+                </svg>
+                Back to Dashboard
+            </a>
+        </div>
+    </div>
+
+    <!-- Stats summary bar -->
+    <div class="mb-8 grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div class="flex items-center gap-4 bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-white/10 shadow-sm px-5 py-4">
+            <div class="flex items-center justify-center size-10 rounded-xl bg-violet-50 dark:bg-violet-900/30 text-violet-600 dark:text-violet-400 shrink-0">
+                <svg class="size-5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z" />
+                </svg>
+            </div>
+            <div>
+                <p class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">Residents</p>
+                <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ residents_count }}</p>
+            </div>
+        </div>
+        <div class="flex items-center gap-4 bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-white/10 shadow-sm px-5 py-4">
+            <div class="flex items-center justify-center size-10 rounded-xl bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 shrink-0">
+                <svg class="size-5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75m-3-7.036A11.959 11.959 0 0 1 3.598 6 11.99 11.99 0 0 0 3 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285Z" />
+                </svg>
+            </div>
+            <div>
+                <p class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">Admins</p>
+                <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ admins_count }}</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Users Table Card -->
+    <div class="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-white/10 shadow-sm overflow-hidden">
+        <div class="flex items-center justify-between px-6 py-5 border-b border-gray-100 dark:border-white/10">
+            <div class="flex items-center gap-3">
+                <div class="flex items-center justify-center size-9 rounded-xl bg-violet-50 dark:bg-violet-900/30 text-violet-600 dark:text-violet-400 shrink-0">
+                    <svg class="size-4.5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 6.75h12M8.25 12h12m-12 5.25h12M3.75 6.75h.007v.008H3.75V6.75Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0ZM3.75 12h.007v.008H3.75V12Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm-3.375 5.25h.007v.008H3.75v-.008Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z" />
+                    </svg>
+                </div>
+                <h3 class="text-sm font-semibold text-gray-900 dark:text-white uppercase tracking-wider">All Platform Users</h3>
+            </div>
+            <span class="text-xs font-medium text-gray-400 dark:text-gray-500 bg-gray-50 dark:bg-white/5 px-2.5 py-1 rounded-lg border border-gray-100 dark:border-white/10">
+                {{ users | length }} Total
+            </span>
+        </div>
+
+        <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse">
+                <thead>
+                    <tr class="bg-gray-50/50 dark:bg-white/5">
+                        <th class="px-6 py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">User</th>
+                        <th class="px-6 py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Email</th>
+                        <th class="px-6 py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Role</th>
+                        <th class="px-6 py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Status</th>
+                        <th class="px-6 py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Joined</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-100 dark:divide-white/5">
+                    {% for user in users %}
+                    <tr class="group hover:bg-gray-50/50 dark:hover:bg-white/[0.02] transition-colors duration-150">
+                        <td class="px-6 py-4">
+                            <div class="flex items-center gap-3">
+                                <div class="size-8 rounded-full flex items-center justify-center text-xs font-bold shrink-0
+                                    {% if user.role == 'admin' %}
+                                        bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400
+                                    {% else %}
+                                        bg-violet-50 dark:bg-violet-900/30 text-violet-600 dark:text-violet-400
+                                    {% endif %}">
+                                    {% if user.full_name %}
+                                        {{ user.full_name[:2] | upper }}
+                                    {% else %}
+                                        {{ user.email[:2] | upper }}
+                                    {% endif %}
+                                </div>
+                                <span class="text-sm font-medium text-gray-900 dark:text-white">
+                                    {{ user.full_name or '—' }}
+                                </span>
+                            </div>
+                        </td>
+                        <td class="px-6 py-4">
+                            <span class="text-xs font-mono text-gray-500 dark:text-gray-400">{{ user.email }}</span>
+                        </td>
+                        <td class="px-6 py-4">
+                            {% if user.role == 'admin' %}
+                                <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-50 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-400">
+                                    <svg class="size-3" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M10 2a1 1 0 0 1 .894.553l2.382 4.826 5.32.773a1 1 0 0 1 .554 1.705l-3.85 3.752.909 5.299a1 1 0 0 1-1.451 1.054L10 17.437l-4.758 2.502a1 1 0 0 1-1.451-1.054l.909-5.3-3.85-3.751a1 1 0 0 1 .554-1.705l5.32-.773L9.106 2.553A1 1 0 0 1 10 2Z" clip-rule="evenodd" />
+                                    </svg>
+                                    Admin
+                                </span>
+                            {% else %}
+                                <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-violet-50 text-violet-700 dark:bg-violet-900/30 dark:text-violet-400">
+                                    <svg class="size-3" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z" />
+                                    </svg>
+                                    Resident
+                                </span>
+                            {% endif %}
+                        </td>
+                        <td class="px-6 py-4">
+                            {% if user.is_active %}
+                                <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-50 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400">
+                                    <span class="size-1.5 rounded-full bg-emerald-500 dark:bg-emerald-400"></span>
+                                    Active
+                                </span>
+                            {% else %}
+                                <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-50 text-gray-600 dark:bg-white/5 dark:text-gray-400">
+                                    <span class="size-1.5 rounded-full bg-gray-400 dark:bg-gray-500"></span>
+                                    Inactive
+                                </span>
+                            {% endif %}
+                        </td>
+                        <td class="px-6 py-4">
+                            <span class="text-xs text-gray-500 dark:text-gray-400">{{ user.created_at.strftime('%b %d, %Y') }}</span>
+                        </td>
+                    </tr>
+                    {% endfor %}
+
+                    {% if not users %}
+                    <tr>
+                        <td colspan="5" class="px-6 py-12 text-center">
+                            <div class="flex flex-col items-center justify-center">
+                                <div class="size-12 rounded-xl bg-gray-50 dark:bg-white/5 text-gray-300 dark:text-gray-600 flex items-center justify-center mb-3">
+                                    <svg class="size-6" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M18 18.72a9.094 9.094 0 0 0 3.741-.479 3 3 0 0 0-4.682-2.72m.94 3.198.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0 1 12 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 0 1 6 18.719m12 0a5.971 5.971 0 0 0-.941-3.197m0 0A5.995 5.995 0 0 0 12 12.75a5.995 5.995 0 0 0-5.058 2.772m0 0a3 3 0 0 0-4.681 2.72 8.986 8.986 0 0 0 3.74.477m.94-3.197a5.971 5.971 0 0 0-.94 3.197M15 6.75a3 3 0 1 1-6 0 3 3 0 0 1 6 0Zm6 3a2.25 2.25 0 1 1-4.5 0 2.25 2.25 0 0 1 4.5 0Zm-13.5 0a2.25 2.25 0 1 1-4.5 0 2.25 2.25 0 0 1 4.5 0Z" />
+                                    </svg>
+                                </div>
+                                <p class="text-sm font-medium text-gray-500 dark:text-gray-400 italic">No users found.</p>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</div>
