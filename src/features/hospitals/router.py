@@ -9,7 +9,7 @@ from features.hospitals.commands.create_hospital import (
     CreateHospitalCommand,
     CreateHospitalHandler,
 )
-from features.hospitals.models import Hospital
+from features.hospitals.models import Hospital, MasterSlot
 from features.hospitals.queries.get_schedule import (
     GetHospitalScheduleHandler,
     GetHospitalScheduleQuery,
@@ -66,6 +66,7 @@ def render_calendar(
     schedule_by_day: dict,
     hospital_name: str,
     current_user: User | None,
+    hospital: Hospital | None = None,
 ):
     template_name = (
         "templates/partials/public_calendar_content.html"
@@ -80,6 +81,7 @@ def render_calendar(
             "schedule_by_day": schedule_by_day,
             "hospital_name": hospital_name,
             "current_user": current_user,
+            "hospital": hospital,
         },
     )
 
@@ -98,7 +100,7 @@ async def hospital_schedule_by_short_name(
 
     if not hospital:
         return render_calendar(
-            request, {}, f"{short_name.upper()} (Not Found)", current_user
+            request, {}, f"{short_name.upper()} (Not Found)", current_user, None
         )
 
     schedule = GetHospitalScheduleHandler(db).execute(
@@ -106,12 +108,106 @@ async def hospital_schedule_by_short_name(
     )
     
     response = render_calendar(
-        request, schedule, f"{hospital.name} Master Schedule", current_user
+        request, schedule, f"{hospital.name} Master Schedule", current_user, hospital
     )
     # Pass the short_name in the trigger so the nav knows exactly what to highlight
     import json
     response.headers["HX-Trigger"] = json.dumps({"hospitalSelected": {"short_name": short_name}})
     return response
+
+
+@router.get("/hospitals/{short_name}/edit", response_class=HTMLResponse)
+async def edit_hospital_schedule(
+    short_name: str,
+    request: Request,
+    db: Session = Depends(get_session),
+    current_user: User | None = Depends(get_current_user),
+):
+    if not current_user or current_user.role.value != "admin":
+        return HTMLResponse("Unauthorized", status_code=403)
+
+    hospital = db.exec(
+        select(Hospital).where(Hospital.short_name == short_name)
+    ).first()
+
+    if not hospital:
+        return HTMLResponse("Hospital not found", status_code=404)
+
+    # Fetch current schedule
+    schedule = db.exec(
+        select(MasterSlot).where(MasterSlot.hospital_id == hospital.id)
+    ).all()
+
+    template_name = (
+        "templates/partials/edit_schedule_content.html"
+        if request.headers.get("hx-request")
+        else "templates/edit_schedule.html"
+    )
+
+    response = templates.TemplateResponse(
+        request=request,
+        name=template_name,
+        context={
+            "hospital": hospital,
+            "schedule": schedule,
+            "current_user": current_user,
+        },
+    )
+    import json
+    response.headers["HX-Trigger"] = json.dumps({"hospitalSelected": {"short_name": short_name}})
+    return response
+
+
+@router.post("/hospitals/{short_name}/slots/new", response_class=HTMLResponse)
+async def add_hospital_slot(
+    short_name: str,
+    request: Request,
+    day_of_week: str = Form(...),
+    specialty: str = Form(...),
+    physician: str = Form(...),
+    time_block: str = Form(...),
+    contact_email: str = Form(...),
+    db: Session = Depends(get_session),
+    current_user: User | None = Depends(get_current_user),
+):
+    if not current_user or current_user.role.value != "admin":
+        return HTMLResponse("Unauthorized", status_code=403)
+
+    hospital = db.exec(select(Hospital).where(Hospital.short_name == short_name)).first()
+    if not hospital:
+        return HTMLResponse("Hospital not found", status_code=404)
+
+    new_slot = MasterSlot(
+        hospital_id=hospital.id,
+        day_of_week=day_of_week,
+        specialty=specialty,
+        physician=physician,
+        time_block=time_block,
+        contact_email=contact_email,
+    )
+    db.add(new_slot)
+    db.commit()
+
+    return await edit_hospital_schedule(short_name, request, db, current_user)
+
+
+@router.delete("/hospitals/{short_name}/slots/{slot_id}", response_class=HTMLResponse)
+async def delete_hospital_slot(
+    short_name: str,
+    slot_id: int,
+    request: Request,
+    db: Session = Depends(get_session),
+    current_user: User | None = Depends(get_current_user),
+):
+    if not current_user or current_user.role.value != "admin":
+        return HTMLResponse("Unauthorized", status_code=403)
+
+    slot = db.get(MasterSlot, slot_id)
+    if slot:
+        db.delete(slot)
+        db.commit()
+
+    return await edit_hospital_schedule(short_name, request, db, current_user)
 
 
 @router.post("/hospitals/new", response_class=HTMLResponse)

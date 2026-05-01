@@ -64,3 +64,17 @@ async def process_login(
 
     return res
 
+
+# ==========================================
+# LOGOUT
+# ==========================================
+@router.post("/logout", response_class=HTMLResponse)
+async def process_logout():
+    """Handles logging out by clearing the session cookie."""
+    res = Response(
+        status_code=200,
+        headers={"HX-Redirect": "/login"},
+    )
+    res.delete_cookie(key="user_session")
+    return res
+

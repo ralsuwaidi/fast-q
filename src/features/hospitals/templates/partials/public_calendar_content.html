@@ -1,10 +1,27 @@
-<div class="mb-6">
-  <h3 class="text-base font-semibold text-base-content">
-    {{ hospital_name }} Schedule
-  </h3>
-  <p class="mt-1 text-sm text-base-content/70">
-    Available shifts and contact information by day.
-  </p>
+<div class="mb-6 flex items-center justify-between">
+  <div>
+    <h3 class="text-base font-semibold text-base-content">
+      {{ hospital_name }} Schedule
+    </h3>
+    <p class="mt-1 text-sm text-base-content/70">
+      Available shifts and contact information by day.
+    </p>
+  </div>
+  {% if current_user and current_user.role.value == 'admin' and hospital %}
+  <div>
+    <a href="/hospitals/{{ hospital.short_name }}/edit"
+       hx-get="/hospitals/{{ hospital.short_name }}/edit"
+       hx-target="#main-content"
+       hx-swap="innerHTML transition:true"
+       hx-push-url="true"
+       class="btn btn-primary btn-sm">
+      <svg class="size-4 mr-1" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10" />
+      </svg>
+      Edit Schedule
+    </a>
+  </div>
+  {% endif %}
 </div>
 
 <div class="mt-6 border-t border-base-300">
