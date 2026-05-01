@@ -20,7 +20,7 @@
     </div>
 
     <!-- Main Form Card -->
-    <div class="bg-white dark:bg-gray-800 rounded-3xl border border-gray-100 dark:border-white/10 shadow-sm overflow-hidden">
+    <div class="sm:bg-white sm:dark:bg-gray-800 sm:rounded-3xl sm:border sm:border-gray-100 sm:dark:border-white/10 sm:shadow-sm sm:overflow-hidden">
         
         {% if error_message %}
         <div class="px-6 pt-6">
@@ -39,7 +39,7 @@
               hx-post="{% if slot %}/my-calendar/slots/{{ slot.id }}/edit{% else %}/my-calendar{% endif %}"
               hx-target="#main-content"
               hx-push-url="true"
-              class="p-6 sm:p-8">
+              class="sm:p-8">
 
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-8">
                 
