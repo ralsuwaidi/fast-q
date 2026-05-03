@@ -36,7 +36,7 @@ Code is organized by feature, not by layer. Each slice lives in `src/features/<f
 
 Routers stay thin: parse the form/query, build a `Command`/`Query` dataclass, instantiate `Handler(db).execute(...)`, render a template. Business logic, validation that touches the DB, and password hashing live in handlers. The README says "use_cases/" — the actual code uses **`commands/` and `queries/`**; follow the existing pattern when adding code.
 
-Current slices: `home` (root/dashboard/admin user CRUD), `users` (login/register/logout), `hospitals` (master schedules, admin-only edit), `residents` (the resident's `/my-calendar` and personal `BookedSlot` records).
+Current slices: `home` (root + dashboard link-tree + admin user CRUD), `users` (login/register/logout), `hospitals` (master schedules, public grid view, admin-only edit), `residents` (the resident's `/my-calendar` and personal `BookedSlot` records), `info` (hard-coded Key Information and Contacts pages — content lives in templates, no DB tables yet).
 
 ### Shared infrastructure (`src/core/`)
 
@@ -56,13 +56,29 @@ This is pervasive — match it in every new route. Each page route checks `reque
 HTMX-specific response headers used in this codebase:
 
 - `HX-Redirect: <url>` — full client-side redirect after a successful POST/DELETE; routes return both this (for HTMX) and a 302 `Location` (for non-HTMX) where applicable.
-- `HX-Trigger: hospitalSelected` (or JSON `{"hospitalSelected": {"short_name": ...}}`) — re-renders the sidebar hospital list, which polls `/hospitals/nav` on this trigger.
+- `HX-Trigger: hospitalSelected` (or JSON `{"hospitalSelected": {"short_name": ...}}`) — re-renders the sidebar hospital list, which polls `/hospitals/nav` on this trigger. Every page route should set this header so the sidebar stays in sync after an HTMX swap.
+
+### Dashboard & navigation as a link tree
+
+`/dashboard` is a launcher of compact `<a class="card">` tiles in four sections (Workspace, My work, Hospitals, Admin) — not a content page. The sidebar (`src/templates/components/_nav_links.html`, included by both the desktop sidebar in `base.html` and the mobile dialog) mirrors the same sections, so adding a new top-level surface means editing both files. Inner pages start with a `← Back to dashboard` button (`btn btn-secondary btn-sm mb-10`) using HTMX swap into `#main-content`.
+
+**Auth-gated tiles** stay visible to logged-out users — they swap their right-side affordance for a lock icon + "Login required" via the shared `indicator(lock=True)` macro in `src/templates/components/_indicators.html`, and link to `/login?next=<destination>` (full nav, not HTMX) so login redirects back. Same convention for sidebar items. The indicator macro also renders status dots (`accent` / `success` / `warning` / `danger`) and short text badges; reuse it for any new card or nav row instead of inventing new visual treatments.
+
+The dashboard handler loads a single `GetDashboardSummaryQuery` (per-hospital slot counts, my-bookings flag, upcoming-shift count + worst status) — one round-trip, do not add per-card queries.
 
 ### Data model essentials
 
 - `User` has a `UserRole` enum (`admin`, `resident`); `is_active`/`is_superuser` exist but most authorization is via `role`.
 - `Hospital` has both `name` (display) and `short_name` (URL slug, no spaces, enforced in `CreateHospitalHandler` and the router).
-- `MasterSlot` is the admin-defined recurring schedule, keyed by `day_of_week`. `BookedSlot` is the resident's personal tracked shift, with a `SlotStatus` workflow (`To Contact` → `Emailed` → `Confirmed`). `BookedSlot` denormalizes hospital/physician/specialty fields from the master slot rather than holding a foreign key, so editing a `MasterSlot` does not retroactively change bookings.
+- `MasterSlot` is the admin-defined recurring schedule, keyed by `day_of_week`. Two fields drive separate concerns:
+  - `time_block` — what residents claim (`AM`, `PM`, or `AM/PM`); the per-day claim list shows AM/PM buttons based on this.
+  - `session` — which row of the Service × Day grid the slot renders in (`AM` or `PM` only). An "AM/PM" clinic is seeded as **two rows** (one per session) both with `time_block="AM/PM"` so it appears in both grid rows while the claim flow still offers AM/PM/both buttons.
+  - `qualifier` — short suffix (e.g. `wk 1&3`, `9–12`, `once a month`, `Telemed only`) rendered in muted text next to the physician name in the grid.
+- `BookedSlot` is the resident's personal tracked shift, with a `SlotStatus` workflow (`To Contact` → `Emailed` → `Confirmed`). `BookedSlot` denormalizes hospital/physician/specialty fields from the master slot rather than holding a foreign key, so editing a `MasterSlot` does not retroactively change bookings.
+
+### Hospital page layout
+
+`/hospitals/{short_name}` renders three things in order: back-to-dashboard button, the **Service × Day grid** (`partials/schedule_grid.html`, fed by `GetScheduleGridHandler`), and the **per-day claim list** (the original `public_calendar_content.html` content, with AM/PM claim buttons for logged-in residents). The grid has a "Download as image" button that calls a global `downloadGrid(id, filename)` JS helper using `html2canvas` (loaded from CDN in `base.html`); the table is wrapped in `overflow-x-auto` so on-screen scroll stays usable while the captured node renders at full unscrolled width — do not collapse columns to fit mobile.
 
 ### Testing
 
