@@ -11,6 +11,7 @@ from features.hospitals.router import router as hospitals_router
 from features.residents.router import router as residents_router
 from features.users.router import router as users_router
 from features.home.router import router as home_router
+from features.info.router import router as info_router
 
 setup_logging()
 
@@ -32,3 +33,4 @@ app.include_router(home_router)
 app.include_router(users_router)
 app.include_router(residents_router)
 app.include_router(hospitals_router)
+app.include_router(info_router)

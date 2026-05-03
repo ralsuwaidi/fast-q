@@ -27,3 +27,5 @@ class MasterSlot(SQLModel, table=True):
     physician: str
     time_block: str
     contact_email: str
+    session: str = Field(default="AM")
+    qualifier: str | None = Field(default=None)

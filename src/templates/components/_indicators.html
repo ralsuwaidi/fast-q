@@ -1,0 +1,31 @@
+{#
+  Shared visual vocabulary for cards & sidebar nav.
+  dot:   "accent" | "success" | "warning" | "danger"
+  badge: any short string ("3 upcoming", "24")
+  lock:  truthy → render lock icon + "Login required"
+#}
+{% macro indicator(dot=None, badge=None, lock=False) %}
+  <span class="flex items-center gap-2 shrink-0">
+    {% if lock %}
+      <span class="inline-flex items-center gap-1 text-[11px]" style="color: var(--color-subtle);">
+        <svg class="size-3" fill="none" viewBox="0 0 24 24" stroke-width="1.75" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 1 0-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 0 0 2.25-2.25v-6.75a2.25 2.25 0 0 0-2.25-2.25H6.75a2.25 2.25 0 0 0-2.25 2.25v6.75a2.25 2.25 0 0 0 2.25 2.25Z"/>
+        </svg>
+        Login required
+      </span>
+    {% else %}
+      {% if badge %}
+        <span class="text-[11px] tabular px-1.5 py-0.5 rounded border border-[var(--color-line)]" style="color: var(--color-muted); background: var(--color-surface-2);">{{ badge }}</span>
+      {% endif %}
+      {% if dot %}
+        {% set color_var = {
+          'accent': '--color-accent',
+          'success': '--color-success',
+          'warning': '--color-warning',
+          'danger': '--color-danger'
+        }.get(dot, '--color-accent') %}
+        <span class="inline-block size-1.5 rounded-full" style="background: var({{ color_var }});" aria-label="{{ dot }}"></span>
+      {% endif %}
+    {% endif %}
+  </span>
+{% endmacro %}

@@ -22,28 +22,36 @@ async def home_redirect():
     """Redirects the root to the dashboard."""
     return RedirectResponse(url="/dashboard", status_code=302)
 
-from features.hospitals.queries.get_all_hospitals import GetAllHospitalsQuery, GetAllHospitalsHandler
+from features.home.queries.get_dashboard_summary import (
+    GetDashboardSummaryHandler,
+    GetDashboardSummaryQuery,
+)
+
 
 @router.get("/dashboard", response_class=HTMLResponse)
 async def dashboard_page(
-    request: Request, 
+    request: Request,
     db: Session = Depends(get_session),
-    current_user: User | None = Depends(get_current_user)
+    current_user: User | None = Depends(get_current_user),
 ):
-    """Renders the dashboard with hospital cards."""
-    hospitals = GetAllHospitalsHandler(db).execute(GetAllHospitalsQuery())
-    residents = db.exec(select(User)).all()
-    
-    template_name = "partials/dashboard_content.html" if request.headers.get("hx-request") else "dashboard.html"
-    
+    """Renders the dashboard as a compact link-tree of cards."""
+    summary = GetDashboardSummaryHandler(db).execute(
+        GetDashboardSummaryQuery(current_user=current_user)
+    )
+
+    template_name = (
+        "partials/dashboard_content.html"
+        if request.headers.get("hx-request")
+        else "dashboard.html"
+    )
+
     response = templates.TemplateResponse(
-        request=request, 
+        request=request,
         name=template_name,
         context={
-            "hospitals": hospitals,
-            "residents_count": len(residents),
-            "current_user": current_user
-        }
+            "summary": summary,
+            "current_user": current_user,
+        },
     )
     response.headers["HX-Trigger"] = "hospitalSelected"
     return response

@@ -14,6 +14,10 @@ from features.hospitals.queries.get_schedule import (
     GetHospitalScheduleHandler,
     GetHospitalScheduleQuery,
 )
+from features.hospitals.queries.get_schedule_grid import (
+    GetScheduleGridHandler,
+    GetScheduleGridQuery,
+)
 from features.users.models import User
 
 router = APIRouter()
@@ -60,6 +64,7 @@ def render_calendar(
     hospital_name: str,
     current_user: User | None,
     hospital: Hospital | None = None,
+    grid=None,
 ):
     template_name = (
         "templates/partials/public_calendar_content.html"
@@ -75,6 +80,7 @@ def render_calendar(
             "hospital_name": hospital_name,
             "current_user": current_user,
             "hospital": hospital,
+            "grid": grid,
         },
     )
 
@@ -99,9 +105,15 @@ async def hospital_schedule_by_short_name(
     schedule = GetHospitalScheduleHandler(db).execute(
         GetHospitalScheduleQuery(hospital.id)
     )
-    
+    grid = GetScheduleGridHandler(db).execute(GetScheduleGridQuery(hospital.id))
+
     response = render_calendar(
-        request, schedule, f"{hospital.name} Master Schedule", current_user, hospital
+        request,
+        schedule,
+        f"{hospital.name} Master Schedule",
+        current_user,
+        hospital,
+        grid=grid,
     )
     # Pass the short_name in the trigger so the nav knows exactly what to highlight
     import json

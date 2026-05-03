@@ -1,132 +1,188 @@
+{% from 'components/_indicators.html' import indicator %}
+
+{#
+  Dashboard = a launcher of compact link tiles.
+  Auth-gated tiles stay visible: lock icon + Login required, click → /login?next=...
+  Indicator vocabulary: dot (accent|success|warning|danger), badge (numeric/short).
+#}
+
 <div>
-  <!-- Page header -->
-  <header class="flex items-end justify-between gap-4 mb-8">
-    <div>
-      <h1 class="text-xl font-semibold tracking-tight text-[var(--color-ink)]">Hospitals</h1>
-      <p class="mt-1 text-sm" style="color: var(--color-muted);">
-        Select a hospital to view its master schedule{% if current_user and current_user.role == 'admin' %}, or add a new one below{% endif %}.
-      </p>
-    </div>
+  <header class="mb-6">
+    <h1 class="text-xl font-semibold tracking-tight text-[var(--color-ink)]">
+      {% if current_user %}Welcome back{% if current_user.full_name %}, {{ current_user.full_name.split(' ')[0] }}{% endif %}.{% else %}ShiftSync{% endif %}
+    </h1>
+    <p class="mt-1 text-sm" style="color: var(--color-muted);">
+      {% if current_user %}Pick a surface to jump into.{% else %}Log in to claim shifts and view your calendar.{% endif %}
+    </p>
   </header>
 
-  <!-- Stats -->
-  <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-10">
-    <div class="card px-4 py-4">
-      <p class="section-title">Hospitals</p>
-      <p class="mt-1 text-2xl font-semibold tabular text-[var(--color-ink)]">{{ hospitals | length }}</p>
-    </div>
-    <div class="card px-4 py-4">
-      <p class="section-title">Active schedules</p>
-      <p class="mt-1 text-2xl font-semibold tabular text-[var(--color-ink)]">{{ hospitals | length }}</p>
-    </div>
-    {% if current_user and current_user.role == 'admin' %}
-    <a href="/admin/users"
-       hx-get="/admin/users"
-       hx-target="#main-content"
-       hx-swap="innerHTML transition:true"
-       hx-push-url="true"
-       class="card px-4 py-4 flex items-start justify-between transition-colors hover:bg-[var(--color-surface-hover)] cursor-pointer">
-      <div>
-        <p class="section-title">Staff managed</p>
-        <p class="mt-1 text-2xl font-semibold tabular text-[var(--color-ink)]">{{ residents_count }}</p>
-      </div>
-      <svg class="size-4 mt-1" style="color: var(--color-subtle);" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-        <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" />
-      </svg>
-    </a>
-    {% else %}
-    <div class="card px-4 py-4">
-      <p class="section-title">Staff managed</p>
-      <p class="mt-1 text-2xl font-semibold tabular text-[var(--color-ink)]">{{ residents_count }}</p>
-    </div>
-    {% endif %}
-  </div>
-
-  <!-- Section heading -->
-  <div class="flex items-center justify-between mb-3">
-    <h2 class="section-title">All hospitals</h2>
-    <span class="text-xs tabular" style="color: var(--color-subtle);">
-      {{ hospitals | length }} result{% if hospitals | length != 1 %}s{% endif %}
-    </span>
-  </div>
-
-  <!-- Hospital list -->
-  <div class="card divide-y divide-[var(--color-line)] overflow-hidden">
-    {% for hospital in hospitals %}
-    <a href="/hospitals/{{ hospital.short_name }}"
-       hx-get="/hospitals/{{ hospital.short_name }}"
-       hx-target="#main-content"
-       hx-swap="innerHTML transition:true"
-       hx-push-url="true"
-       class="group flex items-center gap-3 px-4 py-3 transition-colors hover:bg-[var(--color-surface-hover)]">
-      <span class="inline-flex size-8 shrink-0 items-center justify-center rounded-md border border-[var(--color-line)] bg-[var(--color-surface-2)] font-mono text-xs font-medium" style="color: var(--color-muted);">
-        {{ hospital.name[0]|upper }}
-      </span>
-      <div class="flex-1 min-w-0">
-        <p class="text-sm font-medium text-[var(--color-ink)] truncate">{{ hospital.name }}</p>
-        <p class="text-[11px] font-mono uppercase tracking-wide" style="color: var(--color-subtle);">{{ hospital.short_name }}</p>
-      </div>
-      <span class="text-xs hidden sm:inline" style="color: var(--color-subtle);">View schedule</span>
-      <svg class="size-3.5 transition-transform group-hover:translate-x-0.5" style="color: var(--color-subtle);" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
-        <path stroke-linecap="round" stroke-linejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5"/>
-      </svg>
-    </a>
-    {% endfor %}
-
-    {% if not hospitals %}
-    <div class="flex flex-col items-center justify-center py-16 text-center px-6">
-      <div class="inline-flex size-10 items-center justify-center rounded-md border border-dashed border-[var(--color-line-strong)] mb-3" style="color: var(--color-subtle);">
-        <svg class="size-5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 21h19.5m-18-18v18m10.5-18v18m6-13.5V21M6.75 6.75h.75m-.75 3h.75m-.75 3h.75m3-6h.75m-.75 3h.75m-.75 3h.75M6.75 21v-3.375c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21M3 3h12m-.75 4.5H21" />
-        </svg>
-      </div>
-      <p class="text-sm font-medium text-[var(--color-ink)]">No hospitals yet</p>
-      <p class="mt-1 text-xs" style="color: var(--color-muted);">
-        {% if current_user and current_user.role == 'admin' %}
-          Get started by creating your first hospital below.
-        {% else %}
-          Please contact an administrator to register hospitals.
-        {% endif %}
-      </p>
-    </div>
-    {% endif %}
-  </div>
-
-  <!-- Create new hospital (admin) -->
-  {% if current_user and current_user.role == 'admin' %}
-  <div class="card mt-8">
-    <div class="px-4 py-3 border-b border-[var(--color-line)]">
-      <h3 class="text-sm font-medium text-[var(--color-ink)]">Add a new hospital</h3>
-      <p class="text-xs mt-0.5" style="color: var(--color-muted);">Register a hospital to start managing its shift schedule.</p>
-    </div>
-
-    <div class="px-4 py-4">
-      <form hx-post="/hospitals/new"
-            hx-target="#hospital-error"
-            hx-swap="innerHTML"
-            class="flex flex-col sm:flex-row sm:items-end gap-3">
-
-        <div class="flex-1 min-w-0">
-          <label for="hospital-name" class="label">Full name</label>
-          <input type="text" name="name" id="hospital-name" class="input" placeholder="e.g. Royal Victoria Hospital" required>
-        </div>
-
-        <div class="sm:w-44">
-          <label for="hospital-short-name" class="label">Short name</label>
-          <input type="text" name="short_name" id="hospital-short-name"
-                 pattern="^\S+$" title="Short name cannot contain spaces"
-                 class="input font-mono" placeholder="rvh" required>
-        </div>
-
-        <button type="submit" class="btn btn-primary shrink-0">
-          <svg class="size-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/>
+  {# ---------------- Workspace ---------------- #}
+  <section class="mt-10 mb-6">
+    <div class="section-title px-1 mb-2">Workspace</div>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
+      <a href="/info/key-information"
+         hx-get="/info/key-information" hx-target="#main-content"
+         hx-swap="innerHTML transition:true" hx-push-url="true"
+         class="card flex items-center gap-3 px-3 py-2.5 transition-colors hover:bg-[var(--color-surface-hover)]">
+        <span class="inline-flex size-7 shrink-0 items-center justify-center rounded-md border border-[var(--color-line)] bg-[var(--color-surface-2)]" style="color: var(--color-muted);">
+          <svg class="size-3.5" fill="none" viewBox="0 0 24 24" stroke-width="1.75" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M11.25 11.25l.041-.02a.75.75 0 0 1 1.063.852l-.708 2.836a.75.75 0 0 0 1.063.853l.041-.021M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9-3.75h.008v.008H12V8.25Z"/>
           </svg>
-          Create
-        </button>
-      </form>
-      <div id="hospital-error" class="mt-3 text-xs font-medium" style="color: var(--color-danger);"></div>
+        </span>
+        <div class="flex-1 min-w-0">
+          <p class="text-sm font-medium text-[var(--color-ink)] truncate">Key information</p>
+          <p class="text-[11px] truncate" style="color: var(--color-subtle);">Neuromuscular, MS clinics — who to email and when</p>
+        </div>
+        {{ indicator() }}
+      </a>
+
+      <a href="/info/contacts"
+         hx-get="/info/contacts" hx-target="#main-content"
+         hx-swap="innerHTML transition:true" hx-push-url="true"
+         class="card flex items-center gap-3 px-3 py-2.5 transition-colors hover:bg-[var(--color-surface-hover)]">
+        <span class="inline-flex size-7 shrink-0 items-center justify-center rounded-md border border-[var(--color-line)] bg-[var(--color-surface-2)]" style="color: var(--color-muted);">
+          <svg class="size-3.5" fill="none" viewBox="0 0 24 24" stroke-width="1.75" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 0 1-2.25 2.25h-15a2.25 2.25 0 0 1-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0 0 19.5 4.5h-15a2.25 2.25 0 0 0-2.25 2.25m19.5 0v.243a2.25 2.25 0 0 1-1.07 1.916l-7.5 4.615a2.25 2.25 0 0 1-2.36 0L3.32 8.91a2.25 2.25 0 0 1-1.07-1.916V6.75"/>
+          </svg>
+        </span>
+        <div class="flex-1 min-w-0">
+          <p class="text-sm font-medium text-[var(--color-ink)] truncate">Contact information</p>
+          <p class="text-[11px] truncate" style="color: var(--color-subtle);">Quick reference for MGH &amp; MNH secretaries</p>
+        </div>
+        {{ indicator() }}
+      </a>
     </div>
-  </div>
+  </section>
+
+  {# ---------------- My work ---------------- #}
+  <section class="mt-10 mb-6">
+    <div class="section-title px-1 mb-2">My work</div>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
+      {% if current_user %}
+        <a href="/my-calendar"
+           hx-get="/my-calendar" hx-target="#main-content"
+           hx-swap="innerHTML transition:true" hx-push-url="true"
+           class="card flex items-center gap-3 px-3 py-2.5 transition-colors hover:bg-[var(--color-surface-hover)]">
+          <span class="inline-flex size-7 shrink-0 items-center justify-center rounded-md border border-[var(--color-line)] bg-[var(--color-surface-2)]" style="color: var(--color-muted);">
+            <svg class="size-3.5" fill="none" viewBox="0 0 24 24" stroke-width="1.75" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0v-7.5A2.25 2.25 0 0 1 5.25 9h13.5A2.25 2.25 0 0 1 21 11.25v7.5"/>
+            </svg>
+          </span>
+          <div class="flex-1 min-w-0">
+            <p class="text-sm font-medium text-[var(--color-ink)] truncate">My calendar</p>
+            <p class="text-[11px] truncate" style="color: var(--color-subtle);">
+              {% if summary.my and summary.my.upcoming_count %}{{ summary.my.upcoming_count }} upcoming shift{{ '' if summary.my.upcoming_count == 1 else 's' }}{% else %}No upcoming shifts{% endif %}
+            </p>
+          </div>
+          {{ indicator(dot=summary.my.dot if summary.my else None, badge=(summary.my.upcoming_count|string + ' upcoming') if summary.my and summary.my.upcoming_count else None) }}
+        </a>
+      {% else %}
+        <a href="/login?next=/my-calendar"
+           class="card flex items-center gap-3 px-3 py-2.5 transition-colors hover:bg-[var(--color-surface-hover)]">
+          <span class="inline-flex size-7 shrink-0 items-center justify-center rounded-md border border-[var(--color-line)] bg-[var(--color-surface-2)]" style="color: var(--color-muted);">
+            <svg class="size-3.5" fill="none" viewBox="0 0 24 24" stroke-width="1.75" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25"/>
+            </svg>
+          </span>
+          <div class="flex-1 min-w-0">
+            <p class="text-sm font-medium text-[var(--color-ink)] truncate">My calendar</p>
+            <p class="text-[11px] truncate" style="color: var(--color-subtle);">Track shifts and contact status</p>
+          </div>
+          {{ indicator(lock=True) }}
+        </a>
+      {% endif %}
+    </div>
+  </section>
+
+  {# ---------------- Hospitals ---------------- #}
+  <section class="mt-10 mb-6">
+    <div class="flex items-center justify-between mb-2 px-1">
+      <div class="section-title">Hospitals</div>
+      <span class="text-[11px] tabular" style="color: var(--color-subtle);">{{ summary.hospitals|length }}</span>
+    </div>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
+      {% for h in summary.hospitals %}
+        <a href="/hospitals/{{ h.short_name }}"
+           hx-get="/hospitals/{{ h.short_name }}" hx-target="#main-content"
+           hx-swap="innerHTML transition:true" hx-push-url="true"
+           class="card flex items-center gap-3 px-3 py-2.5 transition-colors hover:bg-[var(--color-surface-hover)]">
+          <span class="inline-flex size-7 shrink-0 items-center justify-center rounded-md border border-[var(--color-line)] bg-[var(--color-surface-2)] font-mono text-[10px] font-semibold uppercase" style="color: var(--color-muted);">
+            {{ h.short_name[:3] }}
+          </span>
+          <div class="flex-1 min-w-0">
+            <p class="text-sm font-medium text-[var(--color-ink)] truncate">{{ h.name }}</p>
+            <p class="text-[11px] truncate" style="color: var(--color-subtle);">View schedule</p>
+          </div>
+          {{ indicator(dot='accent' if h.has_my_bookings else None, badge=(h.slot_count|string + ' shift' + ('' if h.slot_count == 1 else 's')) if h.slot_count else None) }}
+        </a>
+      {% else %}
+        <div class="card px-4 py-6 text-center text-xs" style="color: var(--color-muted);">
+          No hospitals yet.
+        </div>
+      {% endfor %}
+    </div>
+  </section>
+
+  {# ---------------- Admin ---------------- #}
+  {% if current_user and current_user.role.value == 'admin' %}
+  <section class="mt-10 mb-6">
+    <div class="section-title px-1 mb-2">Admin</div>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
+      <a href="/admin/users"
+         hx-get="/admin/users" hx-target="#main-content"
+         hx-swap="innerHTML transition:true" hx-push-url="true"
+         class="card flex items-center gap-3 px-3 py-2.5 transition-colors hover:bg-[var(--color-surface-hover)]">
+        <span class="inline-flex size-7 shrink-0 items-center justify-center rounded-md border border-[var(--color-line)] bg-[var(--color-surface-2)]" style="color: var(--color-muted);">
+          <svg class="size-3.5" fill="none" viewBox="0 0 24 24" stroke-width="1.75" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 0 0 2.625.372 9.337 9.337 0 0 0 4.121-.952 4.125 4.125 0 0 0-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 0 1 8.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0 1 11.964-3.07M12 6.375a3.375 3.375 0 1 1-6.75 0 3.375 3.375 0 0 1 6.75 0Zm8.25 2.25a2.625 2.625 0 1 1-5.25 0 2.625 2.625 0 0 1 5.25 0Z"/>
+          </svg>
+        </span>
+        <div class="flex-1 min-w-0">
+          <p class="text-sm font-medium text-[var(--color-ink)] truncate">Manage users</p>
+          <p class="text-[11px] truncate" style="color: var(--color-subtle);">Residents and admins</p>
+        </div>
+        {{ indicator(badge=summary.user_count|string if summary.user_count else None) }}
+      </a>
+
+      <details class="card">
+        <summary class="flex items-center gap-3 px-3 py-2.5 cursor-pointer transition-colors hover:bg-[var(--color-surface-hover)] list-none">
+          <span class="inline-flex size-7 shrink-0 items-center justify-center rounded-md border border-[var(--color-line)] bg-[var(--color-surface-2)]" style="color: var(--color-muted);">
+            <svg class="size-3.5" fill="none" viewBox="0 0 24 24" stroke-width="1.75" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/>
+            </svg>
+          </span>
+          <div class="flex-1 min-w-0">
+            <p class="text-sm font-medium text-[var(--color-ink)] truncate">Add hospital</p>
+            <p class="text-[11px] truncate" style="color: var(--color-subtle);">Register a new hospital</p>
+          </div>
+        </summary>
+        <div class="px-3 py-3 border-t border-[var(--color-line)]">
+          <form hx-post="/hospitals/new" hx-target="#hospital-error" hx-swap="innerHTML" class="flex flex-col gap-2">
+            <div>
+              <label for="hospital-name" class="label">Full name</label>
+              <input type="text" name="name" id="hospital-name" class="input" placeholder="e.g. Royal Victoria Hospital" required>
+            </div>
+            <div>
+              <label for="hospital-short-name" class="label">Short name</label>
+              <input type="text" name="short_name" id="hospital-short-name" pattern="^\S+$" title="Short name cannot contain spaces" class="input font-mono" placeholder="rvh" required>
+            </div>
+            <button type="submit" class="btn btn-primary btn-sm self-start">Create</button>
+            <div id="hospital-error" class="text-xs font-medium" style="color: var(--color-danger);"></div>
+          </form>
+        </div>
+      </details>
+    </div>
+  </section>
+  {% endif %}
+
+  {# Auth CTA for logged-out visitors #}
+  {% if not current_user %}
+  <section class="mt-8 card px-4 py-4 flex items-center justify-between gap-4">
+    <div>
+      <p class="text-sm font-medium text-[var(--color-ink)]">Log in to your account</p>
+      <p class="text-[11px] mt-0.5" style="color: var(--color-subtle);">Required to claim shifts and view your calendar.</p>
+    </div>
+    <a href="/login" class="btn btn-primary btn-sm">Log in</a>
+  </section>
   {% endif %}
 </div>

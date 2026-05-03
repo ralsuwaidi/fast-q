@@ -1,0 +1,43 @@
+<div>
+  <a href="/dashboard" hx-get="/dashboard" hx-target="#main-content"
+     hx-push-url="true" hx-swap="innerHTML transition:true"
+     class="btn btn-secondary btn-sm mb-10 inline-flex items-center gap-1.5">
+    <svg class="size-3.5" fill="none" viewBox="0 0 24 24" stroke-width="1.75" stroke="currentColor">
+      <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5"/>
+    </svg>
+    Back to dashboard
+  </a>
+
+  <header class="mb-8">
+    <h1 class="text-xl font-semibold tracking-tight text-[var(--color-ink)]">Key information</h1>
+    <p class="mt-1 text-sm" style="color: var(--color-muted);">
+      Booking flow per service. Read this first when scheduling clinics.
+    </p>
+  </header>
+
+  <div class="space-y-4">
+    <article class="card px-4 py-4">
+      <h2 class="text-sm font-semibold text-[var(--color-ink)]">Neuromuscular Clinics &amp; EMG</h2>
+      <ul class="mt-2 space-y-1 text-sm" style="color: var(--color-muted);">
+        <li>Contact <a class="text-[var(--color-accent)] hover:underline" href="mailto:erin.oferrall@mcgill.ca">Dr. O'Ferrall</a> in week 4 of the preceding block.</li>
+        <li>She schedules clinics and confirms trainee availability.</li>
+      </ul>
+    </article>
+
+    <article class="card px-4 py-4">
+      <h2 class="text-sm font-semibold text-[var(--color-ink)]">MS Clinics — MNH</h2>
+      <ul class="mt-2 space-y-1 text-sm" style="color: var(--color-muted);">
+        <li>Email the secretary at <a class="text-[var(--color-accent)] hover:underline" href="mailto:mariaangela.costa@muhc.mcgill.ca">mariaangela.costa@muhc.mcgill.ca</a> and CC physicians.</li>
+        <li>Contact: Maria-Angela Costa (replaced by Gabby Sept 2026).</li>
+      </ul>
+    </article>
+
+    <article class="card px-4 py-4">
+      <h2 class="text-sm font-semibold text-[var(--color-ink)]">MS Clinics — JGH</h2>
+      <ul class="mt-2 space-y-1 text-sm" style="color: var(--color-muted);">
+        <li>Email <a class="text-[var(--color-accent)] hover:underline" href="mailto:sbetsalel@jgh.mcgill.ca">Sandie Betsalel</a> with requested dates.</li>
+        <li>She confirms availability; no shared calendar available.</li>
+      </ul>
+    </article>
+  </div>
+</div>

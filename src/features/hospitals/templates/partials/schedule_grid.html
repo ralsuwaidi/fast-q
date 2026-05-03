@@ -1,0 +1,83 @@
+{#
+  Schedule grid partial.
+  Required context:
+    grid          – ScheduleGrid (days, specialties)
+    grid_id       – unique DOM id (used by html2canvas + download filename)
+    grid_filename – e.g. "mgh-schedule.png"
+#}
+
+<div class="flex items-center justify-between mb-3">
+  <h2 class="section-title">Master schedule</h2>
+  <button type="button"
+          onclick="downloadGrid('{{ grid_id }}', '{{ grid_filename }}')"
+          class="btn btn-secondary btn-sm inline-flex items-center gap-1.5">
+    <svg class="size-3.5" fill="none" viewBox="0 0 24 24" stroke-width="1.75" stroke="currentColor">
+      <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5m-13.5-9L12 3m0 0 4.5 4.5M12 3v13.5"/>
+    </svg>
+    Download as image
+  </button>
+</div>
+
+<div class="overflow-x-auto card">
+  <table id="{{ grid_id }}" class="min-w-[920px] w-full text-xs border-collapse bg-[var(--color-surface)]">
+    <thead>
+      <tr class="border-b border-[var(--color-line)]">
+        <th class="text-left font-semibold text-[var(--color-ink)] px-3 py-2 align-bottom" style="min-width: 9rem;">Service</th>
+        <th class="text-left font-semibold text-[var(--color-ink)] px-3 py-2 align-bottom" style="min-width: 3rem;">Session</th>
+        {% for day in grid.days %}
+          <th class="text-left font-semibold text-[var(--color-ink)] px-3 py-2 align-bottom" style="min-width: 10rem;">{{ day }}</th>
+        {% endfor %}
+        <th class="text-left font-semibold text-[var(--color-ink)] px-3 py-2 align-bottom" style="min-width: 12rem;">Contact</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for spec in grid.specialties %}
+        {% for row in spec.rows %}
+          <tr class="border-b border-[var(--color-line)] {% if loop.first %}border-t-2 border-t-[var(--color-line-strong)]{% endif %}">
+            {% if loop.first %}
+              <td rowspan="{{ spec.rows|length }}" class="px-3 py-2 align-top font-semibold text-[var(--color-ink)] bg-[var(--color-surface-2)] border-r border-[var(--color-line)]">{{ spec.name }}</td>
+            {% endif %}
+            <td class="px-3 py-2 align-top font-mono text-[11px] uppercase" style="color: var(--color-muted);">{{ row.session }}</td>
+            {% for day in grid.days %}
+              <td class="px-3 py-2 align-top text-[var(--color-ink)] border-l border-[var(--color-line)]">
+                {% for cell in row.days[day] %}
+                  <div class="leading-tight">
+                    <span>{{ cell.physician }}</span>{% if cell.qualifier %} <span style="color: var(--color-muted);">{{ cell.qualifier }}</span>{% endif %}
+                  </div>
+                {% endfor %}
+              </td>
+            {% endfor %}
+            {% if loop.first %}
+              <td rowspan="{{ spec.rows|length }}" class="px-3 py-2 align-top border-l border-[var(--color-line)] font-mono text-[11px]" style="color: var(--color-muted);">
+                {% if spec.contact_email %}
+                  <a href="mailto:{{ spec.contact_email }}" class="hover:underline break-all">{{ spec.contact_email }}</a>
+                {% endif %}
+              </td>
+            {% endif %}
+          </tr>
+        {% endfor %}
+      {% else %}
+        <tr><td colspan="{{ grid.days|length + 3 }}" class="px-3 py-6 text-center text-xs" style="color: var(--color-muted);">No shifts have been scheduled yet.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+<script>
+  (function() {
+    if (window.__downloadGridDefined) return;
+    window.__downloadGridDefined = true;
+    window.downloadGrid = function(id, filename) {
+      var el = document.getElementById(id);
+      if (!el || typeof html2canvas !== 'function') return;
+      html2canvas(el, { scale: 2, backgroundColor: '#ffffff', windowWidth: el.scrollWidth }).then(function(canvas) {
+        var link = document.createElement('a');
+        link.download = filename || 'schedule.png';
+        link.href = canvas.toDataURL('image/png');
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      });
+    };
+  })();
+</script>

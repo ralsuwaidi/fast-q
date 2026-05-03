@@ -1,0 +1,57 @@
+{% macro contact_row(label, emails) %}
+  <li class="flex items-start justify-between gap-4 px-3 py-2.5 hover:bg-[var(--color-surface-hover)] transition-colors">
+    <span class="text-sm text-[var(--color-ink)] shrink-0 pt-0.5">{{ label }}</span>
+    <span class="text-right min-w-0">
+      {% for email in emails %}
+        <a href="mailto:{{ email }}" class="block font-mono text-xs truncate hover:underline" style="color: var(--color-muted);">{{ email }}</a>
+      {% endfor %}
+    </span>
+  </li>
+{% endmacro %}
+
+<div>
+  <a href="/dashboard" hx-get="/dashboard" hx-target="#main-content"
+     hx-push-url="true" hx-swap="innerHTML transition:true"
+     class="btn btn-secondary btn-sm mb-10 inline-flex items-center gap-1.5">
+    <svg class="size-3.5" fill="none" viewBox="0 0 24 24" stroke-width="1.75" stroke="currentColor">
+      <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5"/>
+    </svg>
+    Back to dashboard
+  </a>
+
+  <header class="mb-8">
+    <h1 class="text-xl font-semibold tracking-tight text-[var(--color-ink)]">Quick contact reference</h1>
+    <p class="mt-1 text-sm" style="color: var(--color-muted);">Secretaries and shared mailboxes per service. Click an email to open your mail client.</p>
+  </header>
+
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+
+    {# ---- MGH ---- #}
+    <section>
+      <div class="section-title px-1 mb-2">MGH</div>
+      <ul class="card divide-y divide-[var(--color-line)] overflow-hidden">
+        {{ contact_row('Stroke MGH', ['emily.pike@muhc.mcgill.ca', 'olga.musacchio@muhc.mcgill.ca', 'avc.hgm@muhc.mcgill.ca']) }}
+        {{ contact_row('Gen neuro & others', ['mara.divittori@muhc.mcgill.ca']) }}
+        {{ contact_row('Movement disorders', ['silvana.dilollo@muhc.mcgill.ca']) }}
+      </ul>
+    </section>
+
+    {# ---- MNH ---- #}
+    <section>
+      <div class="section-title px-1 mb-2">MNH</div>
+      <ul class="card divide-y divide-[var(--color-line)] overflow-hidden">
+        {{ contact_row('Epilepsy', ['julie.gascon@muhc.mcgill.ca']) }}
+        {{ contact_row('Neurocognitive / Psych', ['beatrice.stoklas@muhc.mcgill.ca']) }}
+        {{ contact_row('Epilepsy', ['roula.vrentzos@muhc.mcgill.ca']) }}
+        {{ contact_row('ALS', ['ritsa.argyriou@muhc.mcgill.ca']) }}
+        {{ contact_row('EMG lab', ['marcella.bolfa@muhc.mcgill.ca']) }}
+        {{ contact_row('MS', ['mariaangela.costa@muhc.mcgill.ca']) }}
+        {{ contact_row('Neurocognitive', ['emma.damrie.comtl@ssss.gouv.qc.ca']) }}
+        {{ contact_row('Neuromuscular', ['josee.terrigno@muhc.mcgill.ca']) }}
+        {{ contact_row('Neurogenetics / Gen neuro', ['jocelyn.bigot@muhc.mcgill.ca']) }}
+        {{ contact_row('Movement disorders', ['stefania.ianni@muhc.muhc.mcgill.ca']) }}
+      </ul>
+    </section>
+
+  </div>
+</div>
