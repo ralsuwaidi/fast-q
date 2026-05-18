@@ -171,6 +171,9 @@ async def get_custom_slot_drawer(
         else "templates/add_custom_slot.html"
     )
 
+    available_dates = form_data["available_dates"]
+    default_date = selected_date or (available_dates[0] if available_dates else ddate.today())
+
     return templates.TemplateResponse(
         request=request,
         name=template_name,
@@ -182,7 +185,9 @@ async def get_custom_slot_drawer(
             "contact_email": form_data["contact_email"],
             "master_slot_id": master_slot_id,
             "time_block_override": time_block or form_data["time_block"],
-            "selected_date": selected_date or ddate.today(),
+            "selected_date": default_date,
+            "day_of_week": form_data["day_of_week"],
+            "available_dates": available_dates,
         },
     )
 

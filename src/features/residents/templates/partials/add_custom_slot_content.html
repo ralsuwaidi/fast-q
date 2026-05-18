@@ -52,8 +52,21 @@
         </div>
 
         <div>
-          <label for="date" class="label">Date</label>
+          <label for="date" class="label">
+            Date
+            {% if day_of_week %}
+            <span class="font-normal" style="color: var(--color-subtle);">— {{ day_of_week }}s only</span>
+            {% endif %}
+          </label>
+          {% if available_dates %}
+          <select name="date" id="date" required class="input tabular">
+            {% for d in available_dates %}
+            <option value="{{ d.isoformat() }}" {% if selected_date and d == selected_date %}selected{% endif %}>{{ d.strftime('%a, %b %-d, %Y') }}</option>
+            {% endfor %}
+          </select>
+          {% else %}
           <input type="date" name="date" id="date" value="{{ selected_date if selected_date else '' }}" required class="input tabular">
+          {% endif %}
         </div>
 
         <div>
