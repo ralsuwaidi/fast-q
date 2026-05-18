@@ -1,11 +1,10 @@
 from dataclasses import dataclass
+from datetime import date
 
 from sqlmodel import Session
 
 from ..models import BookedSlot, SlotStatus
 
-
-from datetime import date
 
 # 1. The Request Object
 @dataclass
@@ -28,7 +27,7 @@ class ClaimShiftHandler:
             master_slot_id=command.master_slot_id,
             date=command.date,
             status=SlotStatus.to_contact,
-            notes=f"Claimed {command.time_block} block."
+            notes=f"Scheduled {command.time_block} block."
         )
         
         self.db.add(new_booking)

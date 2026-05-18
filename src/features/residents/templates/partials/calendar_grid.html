@@ -48,6 +48,8 @@
       {% endfor %}
     </div>
 
+    {% set status_color = {'To Contact': '--color-danger', 'Emailed': '--color-warning', 'Confirmed': '--color-success'} %}
+
     <!-- Desktop grid -->
     <div class="hidden lg:flex lg:flex-auto">
       <div class="w-full grid grid-cols-7 auto-rows-fr">
@@ -72,7 +74,7 @@
                       hx-get="/my-calendar/slots/{{ event.id }}/edit"
                       hx-target="#main-content" hx-push-url="true" hx-swap="innerHTML transition:true"
                       class="group/event flex w-full items-center gap-1.5 text-left cursor-pointer rounded px-1.5 py-0.5 transition-colors hover:bg-[var(--color-accent-soft)]">
-                <span class="dot shrink-0" style="color: var(--color-accent);"></span>
+                <span class="dot shrink-0" style="color: var({{ status_color.get(event.status.value if event.status else '', '--color-accent') }});"></span>
                 <span class="flex-auto truncate text-[11px] font-medium text-[var(--color-ink)] group-hover/event:text-[var(--color-accent)]">{{ event.name }}</span>
                 <time datetime="{{ event.datetime }}" class="hidden xl:inline-block flex-none text-[10px] font-mono tabular" style="color: var(--color-subtle);">{{ event.time }}</time>
               </button>
@@ -107,7 +109,7 @@
         {% if day.events %}
         <span class="mt-auto flex flex-wrap gap-0.5">
           {% for event in day.events %}
-          <span class="size-1 rounded-full" style="background: var(--color-accent);"></span>
+          <span class="size-1 rounded-full" style="background: var({{ status_color.get(event.status.value if event.status else '', '--color-accent') }});"></span>
           {% endfor %}
         </span>
         {% endif %}
@@ -124,7 +126,7 @@
       <li hx-get="/my-calendar/slots/{{ event.id }}/edit"
           hx-target="#main-content" hx-push-url="true" hx-swap="innerHTML transition:true"
           class="group flex items-center gap-3 px-3 py-3 cursor-pointer transition-colors hover:bg-[var(--color-surface-hover)]">
-        <span class="dot shrink-0" style="color: var(--color-accent);"></span>
+        <span class="dot shrink-0" style="color: var({{ status_color.get(event.status.value if event.status else '', '--color-accent') }});"></span>
         <div class="flex-1 min-w-0">
           <p class="text-sm font-medium text-[var(--color-ink)] truncate">{{ event.name }}</p>
           <time datetime="{{ event.datetime }}" class="text-xs font-mono tabular" style="color: var(--color-muted);">{{ event.time }}</time>
