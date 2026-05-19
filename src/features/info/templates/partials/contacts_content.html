@@ -32,8 +32,8 @@
       Secretaries and shared mailboxes per service. Click an email to open your mail client.
     </p>
   </header>
-  <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-    {# ---- MNH ---- #}
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
+    {# ---- MNH (left column) ---- #}
     <section>
       <div class="section-title px-1 mb-2">MNH</div>
       <ul class="card divide-y divide-[var(--color-line)] overflow-hidden">
@@ -49,14 +49,22 @@
         {{ contact_row('Movement disorders', ['stefania.ianni@muhc.muhc.mcgill.ca']) }}
       </ul>
     </section>
-    {# ---- MGH ---- #}
-    <section>
-      <div class="section-title px-1 mb-2">MGH</div>
-      <ul class="card divide-y divide-[var(--color-line)] overflow-hidden">
-        {{ contact_row('Stroke MGH', ['emily.pike@muhc.mcgill.ca', 'olga.musacchio@muhc.mcgill.ca', 'avc.hgm@muhc.mcgill.ca']) }}
-        {{ contact_row('Gen neuro & others', ['mara.divittori@muhc.mcgill.ca']) }}
-        {{ contact_row('Movement disorders', ['silvana.dilollo@muhc.mcgill.ca']) }}
-      </ul>
-    </section>
+    {# ---- MGH + JGH (right column, stacked) ---- #}
+    <div class="space-y-6">
+      <section>
+        <div class="section-title px-1 mb-2">MGH</div>
+        <ul class="card divide-y divide-[var(--color-line)] overflow-hidden">
+          {{ contact_row('Stroke MGH', ['emily.pike@muhc.mcgill.ca', 'olga.musacchio@muhc.mcgill.ca', 'avc.hgm@muhc.mcgill.ca']) }}
+          {{ contact_row('Gen neuro & others', ['mara.divittori@muhc.mcgill.ca']) }}
+          {{ contact_row('Movement disorders', ['silvana.dilollo@muhc.mcgill.ca']) }}
+        </ul>
+      </section>
+      <section>
+        <div class="section-title px-1 mb-2">JGH</div>
+        <ul class="card divide-y divide-[var(--color-line)] overflow-hidden">
+          {{ contact_row('Clinic contact (Sandie)', ['sbetsalel@jgh.mcgill.ca']) }}
+        </ul>
+      </section>
+    </div>
   </div>
 </div>

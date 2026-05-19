@@ -25,8 +25,12 @@
       <h2 class="text-sm font-semibold text-[var(--color-ink)]">Clinics — JGH</h2>
       <ul class="mt-2 space-y-1 text-sm" style="color: var(--color-muted);">
         <li>
-          Email <a class="text-[var(--color-accent)] hover:underline"
-    href="mailto:sbetsalel@jgh.mcgill.ca">Sandie Betsalel</a> with requested dates.
+          Email
+          <button type="button"
+                  data-copy-email="sbetsalel@jgh.mcgill.ca"
+                  class="text-[var(--color-accent)] hover:underline cursor-pointer border-none bg-transparent p-0 font-inherit"
+                  title="Click to copy email">Sandie Betsalel</button>
+          with requested dates.
         </li>
         <li>She confirms availability; no shared calendar available.</li>
       </ul>
@@ -35,8 +39,12 @@
       <h2 class="text-sm font-semibold text-[var(--color-ink)]">Neuromuscular Clinics &amp; EMG</h2>
       <ul class="mt-2 space-y-1 text-sm" style="color: var(--color-muted);">
         <li>
-          Contact <a class="text-[var(--color-accent)] hover:underline"
-    href="mailto:erin.oferrall@mcgill.ca">Dr. O'Ferrall</a> in week 4 of the preceding block.
+          Contact
+          <button type="button"
+                  data-copy-email="erin.oferrall@mcgill.ca"
+                  class="text-[var(--color-accent)] hover:underline cursor-pointer border-none bg-transparent p-0 font-inherit"
+                  title="Click to copy email">Dr. O'Ferrall</button>
+          in week 4 of the preceding block.
         </li>
         <li>She schedules clinics and confirms trainee availability.</li>
       </ul>
@@ -45,11 +53,48 @@
       <h2 class="text-sm font-semibold text-[var(--color-ink)]">MS Clinics — MNH</h2>
       <ul class="mt-2 space-y-1 text-sm" style="color: var(--color-muted);">
         <li>
-          Email the secretary at <a class="text-[var(--color-accent)] hover:underline"
-    href="mailto:mariaangela.costa@muhc.mcgill.ca">mariaangela.costa@muhc.mcgill.ca</a> and CC physicians.
+          Email the secretary at
+          <button type="button"
+                  data-copy-email="mariaangela.costa@muhc.mcgill.ca"
+                  class="text-[var(--color-accent)] hover:underline cursor-pointer border-none bg-transparent p-0 font-inherit break-all text-left"
+                  title="Click to copy email">mariaangela.costa@muhc.mcgill.ca</button>
+          and CC physicians.
         </li>
         <li>Contact: Maria-Angela Costa (replaced by Gabby Sept 2026).</li>
       </ul>
     </article>
   </div>
 </div>
+
+<script>
+  (function () {
+    document.querySelectorAll('[data-copy-email]').forEach(function (btn) {
+      if (btn.dataset.copyBound === '1') return;
+      btn.dataset.copyBound = '1';
+      btn.addEventListener('click', function () {
+        const email = btn.getAttribute('data-copy-email');
+        const original = btn.textContent;
+        const restore = function () {
+          btn.textContent = original;
+          btn.style.color = '';
+        };
+        const flash = function (ok) {
+          btn.textContent = ok ? 'Copied ✓' : 'Copy failed';
+          btn.style.color = ok ? 'var(--color-success)' : 'var(--color-danger)';
+          setTimeout(restore, 1200);
+        };
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(email).then(function () { flash(true); }, function () { flash(false); });
+        } else {
+          // Fallback for non-secure contexts
+          const tmp = document.createElement('textarea');
+          tmp.value = email;
+          document.body.appendChild(tmp);
+          tmp.select();
+          try { document.execCommand('copy'); flash(true); } catch (e) { flash(false); }
+          document.body.removeChild(tmp);
+        }
+      });
+    });
+  })();
+</script>
