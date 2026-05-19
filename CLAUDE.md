@@ -10,9 +10,9 @@ All workflow commands run through `just` (see `justfile`):
 - `just stop` — kills the running uvicorn process (`pkill -f uvicorn`).
 - `just format` — `ruff format` + `ruff check --fix` for Python, `djlint --reformat` for HTML/Jinja.
 - `just lint` — `ruff check` + `djlint --lint` (non-mutating; CI-style).
-- `just seed` — runs `scripts/seed.py` to populate `database.db` with admin/resident users, hospitals, master schedule, and bookings. Skips if any User already exists.
-- `just reset-db` — deletes `database.db` and re-seeds from scratch.
-- `just inspect` — runs `scripts/inspect_db.py` to dump current DB contents.
+- `just seed` — runs `scripts/seed.py` against whatever `DATABASE_URL` points at (Supabase in prod, local SQLite by default). Skips if any User already exists.
+- `just reset-db` — **SQLite only**: deletes `database.db` and re-seeds. Does *not* touch Supabase — wipe via the dashboard or a manual SQL script if you need that.
+- `just inspect` — runs `scripts/inspect_db.py` to dump current DB contents (also `DATABASE_URL`-aware).
 
 Running things directly (any command that imports app code needs `PYTHONPATH=src`):
 
@@ -20,7 +20,16 @@ Running things directly (any command that imports app code needs `PYTHONPATH=src
 - Migrations: `uv run alembic upgrade head`, `uv run alembic revision --autogenerate -m "msg"`. `migrations/env.py` auto-imports every `models.py` under `src/` via `rglob`, so new feature models are picked up automatically — no manual import needed.
 - Default seeded credentials: `admin@example.com` / `resident@example.com`, password `password123`.
 
-Note: `main.py` calls `SQLModel.metadata.create_all(engine)` on startup as a temporary shortcut alongside Alembic; both paths exist intentionally.
+### Database backends
+
+`core/database.py` reads `DATABASE_URL` from env (via `python-dotenv`, so a repo-root `.env` is auto-loaded). Falls back to `sqlite:///database.db` if unset. Schemes `postgres://` and `postgresql://` are rewritten to `postgresql+psycopg://` so SQLAlchemy uses psycopg 3. The module exports `is_sqlite` for guards elsewhere.
+
+- **Local dev**: leave `DATABASE_URL` unset → SQLite at `database.db`. `main.py`'s lifespan calls `SQLModel.metadata.create_all(engine)` only when `is_sqlite` is true; this is the legacy "no Alembic needed for fast iteration" path.
+- **Production / Supabase**: set `DATABASE_URL` to the **Session Pooler** URL (port 5432, `aws-1-ap-northeast-1.pooler.supabase.com`). Supabase's direct connection is IPv6-only and won't work from Render's free tier. The Session Pooler supports prepared statements / DDL, so Alembic runs fine — the Transaction Pooler on 6543 does *not* and will break migrations.
+- **Alembic is authoritative on Postgres**: `create_all` is skipped, so all schema changes must go through a migration.
+- `scripts/seed.py` and `scripts/inspect_db.py` import the shared engine, so they automatically target whichever backend `DATABASE_URL` points at. They have their own (duplicate) SQLModel class definitions to stay standalone — keep those in sync if you change the real models.
+
+`.env.example` documents the connection-string format. Render config: `DATABASE_URL` is declared in `render.yaml` with `sync: false`, so the actual value is set in the Render dashboard and never committed.
 
 ## Architecture
 
@@ -40,7 +49,7 @@ Current slices: `home` (root + dashboard link-tree + admin user CRUD), `users` (
 
 ### Shared infrastructure (`src/core/`)
 
-- `database.py` — single SQLite engine at `database.db`; `get_session()` is the FastAPI session dependency.
+- `database.py` — env-driven engine (SQLite locally, Postgres/Supabase in prod — see "Database backends" above). `get_session()` is the FastAPI session dependency; also exports `is_sqlite` for backend-conditional code.
 - `auth.py` — `get_current_user` reads the `user_session` cookie (just the user id, HTTP-only) and returns the `User` or `None`. There is no JWT, no middleware — every protected route must `Depends(get_current_user)` and check for `None` itself, returning a 302 to `/login` (full page) or `HTMLResponse("Unauthorized", 401/403)` (HTMX). Admin checks compare `current_user.role` to `"admin"`.
 - `logger.py` — `setup_logging()` (called once in `main.py`) hijacks Uvicorn/FastAPI logs into Loguru. Use `from loguru import logger` everywhere.
 
@@ -74,7 +83,30 @@ The dashboard handler loads a single `GetDashboardSummaryQuery` (per-hospital sl
   - `time_block` — what residents claim (`AM`, `PM`, or `AM/PM`); the per-day claim list shows AM/PM buttons based on this.
   - `session` — which row of the Service × Day grid the slot renders in (`AM` or `PM` only). An "AM/PM" clinic is seeded as **two rows** (one per session) both with `time_block="AM/PM"` so it appears in both grid rows while the claim flow still offers AM/PM/both buttons.
   - `qualifier` — short suffix (e.g. `wk 1&3`, `9–12`, `once a month`, `Telemed only`) rendered in muted text next to the physician name in the grid.
-- `BookedSlot` is the resident's personal tracked shift, with a `SlotStatus` workflow (`To Contact` → `Emailed` → `Confirmed`). `BookedSlot` denormalizes hospital/physician/specialty fields from the master slot rather than holding a foreign key, so editing a `MasterSlot` does not retroactively change bookings.
+- `BookedSlot` is the resident's personal tracked shift, with a `SlotStatus` workflow (`To Contact` → `Emailed` → `Confirmed`). `BookedSlot` denormalizes hospital/physician/specialty/contact_email from the master slot rather than holding a foreign key, so editing a `MasterSlot` does not retroactively change bookings.
+
+### Claim flow vs. custom-slot flow
+
+`POST /my-calendar` is dual-purpose, dispatched on whether the form carries a `master_slot_id`:
+
+- **Master slot present** → `ClaimShiftHandler` looks up the `MasterSlot` + `Hospital` server-side and writes authoritative denormalized fields onto the new `BookedSlot`. Form-supplied `hospital_name`/`physician`/`specialty`/`contact_email` are **ignored** — the resident can't tamper with them. The form template marks those inputs `readonly` when `master_slot_id` is set so the UI matches the contract.
+- **No master slot** → `CreateCustomSlotHandler` builds the booking from form fields verbatim. This is the "Add slot" / custom-shift path from `/my-calendar`.
+
+The form template (`add_custom_slot_content.html`) is shared by both flows and also by the edit route (`POST /my-calendar/slots/{id}/edit`, handled by `UpdateSlotHandler`). Edit lets the user mutate all fields freely — because there's no FK back to the master slot, there's no way to re-derive after editing, so the denormalized fields stay user-editable for the edit case.
+
+When `master_slot_id` is present, the Date input is replaced with a `<select>` of the next 12 occurrences of `MasterSlot.day_of_week` (computed in `GetCustomSlotFormHandler`), so a Tuesday slot only lets the user pick Tuesdays. The native `<input type="date">` is only used when there's no master slot, or on the edit form.
+
+### Resident calendar status colors
+
+`/my-calendar` event dots and mobile day-pills are color-coded by `BookedSlot.status` — the mapping lives at the top of `calendar_grid.html`:
+
+| Status | CSS var |
+|---|---|
+| `To Contact` | `--color-subtle` (grey) |
+| `Emailed` | `--color-warning` (orange) |
+| `Confirmed` | `--color-success` (green) |
+
+If you add a new `SlotStatus`, update the `status_color` dict in that template — otherwise it falls back to `--color-accent`.
 
 ### Hospital page layout
 
@@ -90,4 +122,4 @@ The dashboard handler loads a single `GetDashboardSummaryQuery` (per-hospital sl
 - Imports from app code use the `features.x.y` / `core.x` form (no `src.` prefix) because `PYTHONPATH=src`.
 - Passwords are hashed with `pwdlib`'s `PasswordHash.recommended()` (Argon2). Never store or compare raw passwords.
 - Inline error HTML is returned with `status_code=200` for HTMX form submissions so HTMX swaps the error markup in place — don't change those to 4xx without also updating the front-end swap target.
-- Deployment is Render (`render.yaml`): `uv sync --frozen` + Tailwind build at build time; `alembic upgrade head` + `uvicorn main:app` at start time, with `PYTHONPATH=src`.
+- Deployment is Render (`render.yaml`): `uv sync --frozen` + Tailwind build at build time; `alembic upgrade head` + `uvicorn main:app` at start time, with `PYTHONPATH=src`. `DATABASE_URL` is declared in `render.yaml` as `sync: false` — set the actual Supabase Session Pooler URL in the Render dashboard, never commit it.
