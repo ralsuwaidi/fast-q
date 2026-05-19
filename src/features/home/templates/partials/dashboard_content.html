@@ -75,6 +75,34 @@
       </a>
     </div>
   </section>
+  {# ---------------- Hospitals ---------------- #}
+  <section class="mt-10 mb-6">
+    <div class="flex items-center justify-between mb-2 px-1">
+      <div class="section-title">Hospitals</div>
+      <span class="text-[11px] tabular" style="color: var(--color-subtle);">{{ summary.hospitals|length }}</span>
+    </div>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
+      {% for h in summary.hospitals|reverse %}
+        <a href="/hospitals/{{ h.short_name }}"
+           hx-get="/hospitals/{{ h.short_name }}"
+           hx-target="#main-content"
+           hx-swap="innerHTML transition:true"
+           hx-push-url="true"
+           class="card flex items-center gap-3 px-3 py-2.5 transition-colors hover:bg-[var(--color-surface-hover)]">
+          <span class="inline-flex size-7 shrink-0 items-center justify-center rounded-md border border-[var(--color-line)] bg-[var(--color-surface-2)] font-mono text-[10px] font-semibold uppercase"
+                style="color: var(--color-muted)">{{ h.short_name[:3] }}</span>
+          <div class="flex-1 min-w-0">
+            <p class="text-sm font-medium text-[var(--color-ink)] truncate">{{ h.name }}</p>
+            <p class="text-[11px] truncate" style="color: var(--color-subtle);">View schedule</p>
+          </div>
+          {{ indicator(dot='accent' if h.has_my_bookings else None, badge=(h.slot_count|string + ' shift' + ('' if h.slot_count == 1 else 's') ) if h.slot_count else None) }}
+        </a>
+      {% else %}
+        <div class="card px-4 py-6 text-center text-xs"
+             style="color: var(--color-muted)">No hospitals yet.</div>
+      {% endfor %}
+    </div>
+  </section>
   {# ---------------- My work ---------------- #}
   <section class="mt-10 mb-6">
     <div class="section-title px-1 mb-2">My work</div>
@@ -128,34 +156,6 @@
           {{ indicator(lock=True) }}
         </a>
       {% endif %}
-    </div>
-  </section>
-  {# ---------------- Hospitals ---------------- #}
-  <section class="mt-10 mb-6">
-    <div class="flex items-center justify-between mb-2 px-1">
-      <div class="section-title">Hospitals</div>
-      <span class="text-[11px] tabular" style="color: var(--color-subtle);">{{ summary.hospitals|length }}</span>
-    </div>
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
-      {% for h in summary.hospitals %}
-        <a href="/hospitals/{{ h.short_name }}"
-           hx-get="/hospitals/{{ h.short_name }}"
-           hx-target="#main-content"
-           hx-swap="innerHTML transition:true"
-           hx-push-url="true"
-           class="card flex items-center gap-3 px-3 py-2.5 transition-colors hover:bg-[var(--color-surface-hover)]">
-          <span class="inline-flex size-7 shrink-0 items-center justify-center rounded-md border border-[var(--color-line)] bg-[var(--color-surface-2)] font-mono text-[10px] font-semibold uppercase"
-                style="color: var(--color-muted)">{{ h.short_name[:3] }}</span>
-          <div class="flex-1 min-w-0">
-            <p class="text-sm font-medium text-[var(--color-ink)] truncate">{{ h.name }}</p>
-            <p class="text-[11px] truncate" style="color: var(--color-subtle);">View schedule</p>
-          </div>
-          {{ indicator(dot='accent' if h.has_my_bookings else None, badge=(h.slot_count|string + ' shift' + ('' if h.slot_count == 1 else 's') ) if h.slot_count else None) }}
-        </a>
-      {% else %}
-        <div class="card px-4 py-6 text-center text-xs"
-             style="color: var(--color-muted)">No hospitals yet.</div>
-      {% endfor %}
     </div>
   </section>
   {# ---------------- Admin ---------------- #}

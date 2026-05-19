@@ -29,26 +29,31 @@
           hx-target="#main-content"
           hx-push-url="true">
 
+      {% if master_slot_id and not slot %}
+      <input type="hidden" name="master_slot_id" value="{{ master_slot_id }}">
+      {% endif %}
+      {% set locked = master_slot_id and not slot %}
+
       <div class="p-5 grid grid-cols-1 sm:grid-cols-2 gap-x-5 gap-y-4">
 
         <div>
           <label for="hospital_name" class="label">Hospital</label>
-          <input type="text" name="hospital_name" id="hospital_name" value="{{ hospital_name }}" required placeholder="Hospital name" class="input">
+          <input type="text" name="hospital_name" id="hospital_name" value="{{ hospital_name }}" required placeholder="Hospital name" class="input" {% if locked %}readonly{% endif %}>
         </div>
 
         <div>
           <label for="physician" class="label">Physician</label>
-          <input type="text" name="physician" id="physician" value="{{ physician }}" required placeholder="Physician name" class="input">
+          <input type="text" name="physician" id="physician" value="{{ physician }}" required placeholder="Physician name" class="input" {% if locked %}readonly{% endif %}>
         </div>
 
         <div>
           <label for="specialty" class="label">Specialty</label>
-          <input type="text" name="specialty" id="specialty" value="{{ specialty }}" placeholder="e.g. Cardiology" class="input">
+          <input type="text" name="specialty" id="specialty" value="{{ specialty }}" placeholder="e.g. Cardiology" class="input" {% if locked %}readonly{% endif %}>
         </div>
 
         <div>
           <label for="contact_email" class="label">Contact email</label>
-          <input type="email" name="contact_email" id="contact_email" value="{{ contact_email }}" required placeholder="you@example.com" class="input">
+          <input type="email" name="contact_email" id="contact_email" value="{{ contact_email }}" required placeholder="you@example.com" class="input" {% if locked %}readonly{% endif %}>
         </div>
 
         <div>

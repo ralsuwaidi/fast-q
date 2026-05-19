@@ -5,7 +5,7 @@ from fastapi.staticfiles import StaticFiles
 from loguru import logger
 from sqlmodel import SQLModel
 
-from core.database import engine
+from core.database import engine, is_sqlite
 from core.logger import setup_logging
 from features.hospitals.router import router as hospitals_router
 from features.residents.router import router as residents_router
@@ -18,8 +18,9 @@ setup_logging()
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # Ensure database tables are created on startup (Temporary until you setup Alembic)
-    SQLModel.metadata.create_all(engine)
+    # SQLite dev shortcut — Alembic is authoritative for Postgres/Supabase.
+    if is_sqlite:
+        SQLModel.metadata.create_all(engine)
     yield
 
 

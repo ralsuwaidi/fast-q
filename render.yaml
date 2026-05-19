@@ -8,5 +8,7 @@ services:
         value: 3.13
       - key: PYTHONPATH
         value: src
+      - key: DATABASE_URL
+        sync: false
     buildCommand: "curl -LsSf https://astral.sh/uv/install.sh | sh && source $HOME/.cargo/env && uv sync --frozen && chmod +x ./tailwindcss && ./tailwindcss -i ./src/static/input.css -o ./src/static/output.css"
     startCommand: "source $HOME/.cargo/env && uv run alembic upgrade head && uv run uvicorn main:app --host 0.0.0.0 --port $PORT"

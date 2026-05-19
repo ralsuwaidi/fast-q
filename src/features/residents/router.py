@@ -8,6 +8,7 @@ from sqlmodel import Session
 
 from core.auth import get_current_user
 from core.database import get_session
+from features.residents.commands.claim_shift import ClaimShiftCommand, ClaimShiftHandler
 from features.residents.commands.create_custom_slot import (
     CreateCustomSlotCommand,
     CreateCustomSlotHandler,
@@ -203,6 +204,7 @@ async def create_custom_slot(
     specialty: str | None = Form(None),
     status: SlotStatus = Form(SlotStatus.to_contact),
     notes: str | None = Form(None),
+    master_slot_id: int | None = Form(None),
     db: Session = Depends(get_session),
     current_user: User | None = Depends(get_current_user),
 ):
@@ -213,16 +215,17 @@ async def create_custom_slot(
 
     # --- 1. Router Level Validation ---
     errors = []
-    if not hospital_name:
-        errors.append("Hospital is required.")
-    if not physician:
-        errors.append("Physician is required.")
     if not time_block:
         errors.append("Time Block is required.")
-    if not contact_email:
-        errors.append("Contact Email is required.")
     if not date:
         errors.append("Date is required.")
+    if not master_slot_id:
+        if not hospital_name:
+            errors.append("Hospital is required.")
+        if not physician:
+            errors.append("Physician is required.")
+        if not contact_email:
+            errors.append("Contact Email is required.")
 
     parsed_date = None
     if date:
@@ -247,23 +250,37 @@ async def create_custom_slot(
                 "contact_email": contact_email,
                 "selected_date": parsed_date,
                 "time_block_override": time_block,
+                "master_slot_id": master_slot_id,
                 "error_message": error_html,
             },
         )
 
     # --- 2. Dispatch Command (Write) ---
-    command = CreateCustomSlotCommand(
-        user_id=current_user.id,
-        hospital_name=hospital_name,
-        physician=physician,
-        time_block=time_block,
-        contact_email=contact_email,
-        date=parsed_date,
-        specialty=specialty,
-        status=status,
-        notes=notes,
-    )
-    CreateCustomSlotHandler(db).execute(command)
+    if master_slot_id:
+        ClaimShiftHandler(db).execute(
+            ClaimShiftCommand(
+                user_id=current_user.id,
+                master_slot_id=master_slot_id,
+                time_block=time_block,
+                date=parsed_date,
+                status=status,
+                notes=notes,
+            )
+        )
+    else:
+        CreateCustomSlotHandler(db).execute(
+            CreateCustomSlotCommand(
+                user_id=current_user.id,
+                hospital_name=hospital_name,
+                physician=physician,
+                time_block=time_block,
+                contact_email=contact_email,
+                date=parsed_date,
+                specialty=specialty,
+                status=status,
+                notes=notes,
+            )
+        )
 
     # --- 3. Return Response (Redirect to Calendar) ---
     is_htmx = request.headers.get("hx-request") == "true"

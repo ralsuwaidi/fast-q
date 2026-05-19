@@ -3,39 +3,36 @@
     <span class="text-sm text-[var(--color-ink)] shrink-0 pt-0.5">{{ label }}</span>
     <span class="text-right min-w-0">
       {% for email in emails %}
-        <a href="mailto:{{ email }}" class="block font-mono text-xs truncate hover:underline" style="color: var(--color-muted);">{{ email }}</a>
+        <a href="mailto:{{ email }}"
+           class="block font-mono text-xs truncate hover:underline"
+           style="color: var(--color-muted)">{{ email }}</a>
       {% endfor %}
     </span>
   </li>
 {% endmacro %}
-
 <div>
-  <a href="/dashboard" hx-get="/dashboard" hx-target="#main-content"
-     hx-push-url="true" hx-swap="innerHTML transition:true"
+  <a href="/dashboard"
+     hx-get="/dashboard"
+     hx-target="#main-content"
+     hx-push-url="true"
+     hx-swap="innerHTML transition:true"
      class="btn btn-secondary btn-sm mb-10 inline-flex items-center gap-1.5">
-    <svg class="size-3.5" fill="none" viewBox="0 0 24 24" stroke-width="1.75" stroke="currentColor">
-      <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5"/>
+    <svg class="size-3.5"
+         fill="none"
+         viewBox="0 0 24 24"
+         stroke-width="1.75"
+         stroke="currentColor">
+      <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5" />
     </svg>
     Back to dashboard
   </a>
-
   <header class="mb-8">
     <h1 class="text-xl font-semibold tracking-tight text-[var(--color-ink)]">Quick contact reference</h1>
-    <p class="mt-1 text-sm" style="color: var(--color-muted);">Secretaries and shared mailboxes per service. Click an email to open your mail client.</p>
+    <p class="mt-1 text-sm" style="color: var(--color-muted);">
+      Secretaries and shared mailboxes per service. Click an email to open your mail client.
+    </p>
   </header>
-
   <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-
-    {# ---- MGH ---- #}
-    <section>
-      <div class="section-title px-1 mb-2">MGH</div>
-      <ul class="card divide-y divide-[var(--color-line)] overflow-hidden">
-        {{ contact_row('Stroke MGH', ['emily.pike@muhc.mcgill.ca', 'olga.musacchio@muhc.mcgill.ca', 'avc.hgm@muhc.mcgill.ca']) }}
-        {{ contact_row('Gen neuro & others', ['mara.divittori@muhc.mcgill.ca']) }}
-        {{ contact_row('Movement disorders', ['silvana.dilollo@muhc.mcgill.ca']) }}
-      </ul>
-    </section>
-
     {# ---- MNH ---- #}
     <section>
       <div class="section-title px-1 mb-2">MNH</div>
@@ -52,6 +49,14 @@
         {{ contact_row('Movement disorders', ['stefania.ianni@muhc.muhc.mcgill.ca']) }}
       </ul>
     </section>
-
+    {# ---- MGH ---- #}
+    <section>
+      <div class="section-title px-1 mb-2">MGH</div>
+      <ul class="card divide-y divide-[var(--color-line)] overflow-hidden">
+        {{ contact_row('Stroke MGH', ['emily.pike@muhc.mcgill.ca', 'olga.musacchio@muhc.mcgill.ca', 'avc.hgm@muhc.mcgill.ca']) }}
+        {{ contact_row('Gen neuro & others', ['mara.divittori@muhc.mcgill.ca']) }}
+        {{ contact_row('Movement disorders', ['silvana.dilollo@muhc.mcgill.ca']) }}
+      </ul>
+    </section>
   </div>
 </div>

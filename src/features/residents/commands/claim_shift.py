@@ -1,37 +1,55 @@
 from dataclasses import dataclass
 from datetime import date
 
+from fastapi import HTTPException
 from sqlmodel import Session
+
+from features.hospitals.models import Hospital, MasterSlot
 
 from ..models import BookedSlot, SlotStatus
 
 
-# 1. The Request Object
 @dataclass
 class ClaimShiftCommand:
     user_id: int
     master_slot_id: int
     time_block: str
     date: date
+    status: SlotStatus = SlotStatus.to_contact
+    notes: str | None = None
 
-# 2. The Handler
+
 class ClaimShiftHandler:
+    """
+    Books a shift derived from a MasterSlot. Hospital, physician, specialty,
+    and contact email come from the master slot — never from user input — so
+    the booking stays authoritative even if the form is tampered with.
+    """
+
     def __init__(self, db: Session):
         self.db = db
 
     def execute(self, command: ClaimShiftCommand) -> BookedSlot:
-        """Executes the command to save a claimed shift."""
-        
-        new_booking = BookedSlot(
+        master = self.db.get(MasterSlot, command.master_slot_id)
+        if master is None:
+            raise HTTPException(status_code=404, detail="Master slot not found")
+
+        hospital = self.db.get(Hospital, master.hospital_id)
+        if hospital is None:
+            raise HTTPException(status_code=404, detail="Hospital not found")
+
+        booking = BookedSlot(
             user_id=command.user_id,
-            master_slot_id=command.master_slot_id,
+            hospital_name=hospital.name,
             date=command.date,
-            status=SlotStatus.to_contact,
-            notes=f"Scheduled {command.time_block} block."
+            specialty=master.specialty,
+            physician=master.physician,
+            time_block=command.time_block,
+            contact_email=master.contact_email,
+            status=command.status,
+            notes=command.notes,
         )
-        
-        self.db.add(new_booking)
+        self.db.add(booking)
         self.db.commit()
-        self.db.refresh(new_booking)
-        
-        return new_booking
+        self.db.refresh(booking)
+        return booking

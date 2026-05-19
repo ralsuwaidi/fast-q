@@ -1,9 +1,17 @@
 import enum
+import os
+import sys
 from datetime import UTC, date, datetime
+from pathlib import Path
 
 from pwdlib import PasswordHash
 from pydantic import EmailStr
-from sqlmodel import Field, Session, SQLModel, create_engine, select
+from sqlmodel import Field, Session, SQLModel, select
+
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "src"))
+os.environ.setdefault("PYTHONPATH", "src")
+
+from core.database import engine  # noqa: E402
 
 # ==========================================
 # 1. MODELS
@@ -70,16 +78,7 @@ class BookedSlot(SQLModel, table=True):
 
 
 # ==========================================
-# 2. DATABASE SETUP
-# ==========================================
-
-sqlite_file_name = "database.db"
-sqlite_url = f"sqlite:///{sqlite_file_name}"
-engine = create_engine(sqlite_url, echo=True)
-
-
-# ==========================================
-# 3. SEEDING FUNCTION
+# 2. SEEDING FUNCTION
 # ==========================================
 
 

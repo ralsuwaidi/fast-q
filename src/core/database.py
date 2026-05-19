@@ -1,12 +1,20 @@
+import os
+
+from dotenv import load_dotenv
 from sqlmodel import Session, create_engine
 
-# SQLite configuration
-sqlite_file_name = "database.db"
-sqlite_url = f"sqlite:///{sqlite_file_name}"
+load_dotenv()
 
-# WAL mode makes SQLite concurrent and fast
-connect_args = {"check_same_thread": False}
-engine = create_engine(sqlite_url, connect_args=connect_args)
+DATABASE_URL = os.environ.get("DATABASE_URL", "sqlite:///database.db")
+
+if DATABASE_URL.startswith("postgres://"):
+    DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql+psycopg://", 1)
+elif DATABASE_URL.startswith("postgresql://"):
+    DATABASE_URL = DATABASE_URL.replace("postgresql://", "postgresql+psycopg://", 1)
+
+is_sqlite = DATABASE_URL.startswith("sqlite")
+connect_args = {"check_same_thread": False} if is_sqlite else {}
+engine = create_engine(DATABASE_URL, connect_args=connect_args, pool_pre_ping=not is_sqlite)
 
 
 def get_session():
